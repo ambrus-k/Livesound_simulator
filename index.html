@@ -108,42 +108,54 @@
         <!-- Left Column: Guide Description & Core Stats (5 Cols) -->
         <section class="lg:col-span-5 flex flex-col gap-5">
             <!-- General Info Panel -->
-            <div class="bg-surface rounded-2xl border border-slate-800/80 p-5 flex flex-col shadow-xl">
-                <div class="flex items-center justify-between border-b border-slate-800 pb-3.5 mb-4">
+            <div class="bg-surface rounded-xl border border-slate-800 p-5 flex flex-col shadow-xl">
+                <div class="flex items-center justify-between border-b border-slate-700/50 pb-3 mb-4">
                     <h2 id="activeInstTitle" class="text-xl font-extrabold text-white tracking-tight">--</h2>
-                    <span id="activeInstCategory" class="text-[10px] font-bold px-3 py-1 bg-slate-900 text-slate-300 rounded-full border border-slate-700/80 uppercase tracking-widest">--</span>
+                    <span id="activeInstCategory" class="text-xs font-semibold px-2.5 py-1 bg-slate-800 text-slate-300 rounded-full border border-slate-700 uppercase tracking-wider">--</span>
                 </div>
 
                 <!-- Theory 60% Section -->
                 <div class="mb-4">
-                    <h3 class="text-[11px] font-extrabold text-emerald-400 uppercase tracking-widest mb-2 flex items-center gap-1.5">
-                        <svg class="w-4 h-4 text-emerald-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/></svg>
-                        Odborná literatura (60%)
+                    <h3 class="text-xs font-bold text-emerald-400 uppercase tracking-widest mb-1.5 flex items-center gap-1.5">
+                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/></svg>
+                        Teoretická Východiska (Odborná literatura 60%)
                     </h3>
-                    <p id="theoryText" class="text-slate-300 text-xs sm:text-sm leading-relaxed text-justify bg-slate-950/40 p-3.5 rounded-xl border border-slate-900">
+                    <p id="theoryText" class="text-slate-300 text-sm leading-relaxed text-justify">
                         Načítání teoretických dat...
                     </p>
                 </div>
 
                 <!-- Live Practice 40% Section -->
                 <div>
-                    <h3 class="text-[11px] font-extrabold text-cyan-400 uppercase tracking-widest mb-2 flex items-center gap-1.5">
-                        <svg class="w-4 h-4 text-cyan-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/></svg>
-                        Zvukařská praxe & fora (40%)
+                    <h3 class="text-xs font-bold text-cyan-400 uppercase tracking-widest mb-1.5 flex items-center gap-1.5">
+                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/></svg>
+                        Zkušenosti z praxe a fór zvukařů (40%)
                     </h3>
-                    <p id="practiceText" class="text-slate-300 text-xs sm:text-sm leading-relaxed text-justify bg-slate-950/40 p-3.5 rounded-xl border border-slate-900">
+                    <p id="practiceText" class="text-slate-300 text-sm leading-relaxed text-justify">
                         Načítání informací ze zvukařských diskuzí...
                     </p>
                 </div>
             </div>
 
-            <!-- Channel Settings Numerical Summary -->
-            <div class="bg-surface rounded-2xl border border-slate-800/80 p-4 shadow-xl">
-                <h3 class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-3 pb-2 border-b border-slate-800">Doporučené Výchozí Parametry</h3>
-                <div class="grid grid-cols-3 gap-2.5 text-center text-xs">
-                    <div class="bg-[#0b0d14]/80 p-2.5 rounded-xl border border-slate-800/80">
-                        <span class="block text-[9px] text-slate-500 font-bold uppercase mb-1">High-Pass Filter</span>
-                        <span id="statHPF" class="font-mono text-emerald-400 font-bold text-sm">-- Hz</span>
+            <!-- Channel Settings Numerical Summary with Save/Reset Actions -->
+            <div class="bg-surface rounded-xl border border-slate-800 p-4 shadow-xl">
+                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 mb-3 pb-2 border-b border-slate-800">
+                    <h3 class="text-xs font-bold text-slate-400 uppercase tracking-widest">Doporučené Výchozí Parametry</h3>
+                    <div class="flex items-center gap-2">
+                        <button id="resetBtn" class="px-2.5 py-1 bg-rose-950/80 hover:bg-rose-900 border border-rose-800/80 hover:border-rose-700 text-rose-300 rounded text-[10px] font-bold uppercase tracking-wider transition-all duration-150 flex items-center gap-1 shadow-sm" title="Obnovit původní doporučené nastavení">
+                            <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M4 4v5h.582m15.356 2A8.001 8.001 0 1121.21 8H18"/></svg>
+                            Obnovit
+                        </button>
+                        <button id="saveBtn" class="px-2.5 py-1 bg-cyan-950/80 hover:bg-cyan-900 border border-cyan-850 hover:border-cyan-700 text-cyan-300 rounded text-[10px] font-bold uppercase tracking-wider transition-all duration-150 flex items-center gap-1 shadow-sm" title="Uložit upravené nastavení">
+                            <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4"/></svg>
+                            Uložit
+                        </button>
+                    </div>
+                </div>
+                <div class="grid grid-cols-3 gap-2 text-center text-xs">
+                    <div class="bg-slate-900/60 p-2 rounded border border-slate-800/80">
+                        <span class="block text-[10px] text-slate-500 font-bold uppercase mb-0.5">High-Pass Filter</span>
+                        <span id="statHPF" class="font-mono text-emerald-400 font-semibold text-sm">80 Hz</span>
                     </div>
                     <div class="bg-[#0b0d14]/80 p-2.5 rounded-xl border border-slate-800/80">
                         <span class="block text-[9px] text-slate-500 font-bold uppercase mb-1">Gate Threshold</span>
@@ -187,67 +199,67 @@
         <section class="lg:col-span-7 flex flex-col gap-5">
             
             <!-- Graphic Equalizer Card -->
-            <div class="bg-surface rounded-2xl border border-slate-800/80 p-5 shadow-xl flex flex-col gap-4 relative">
-                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-slate-800 pb-3">
+            <div class="bg-surface rounded-xl border border-slate-800 p-5 shadow-xl flex flex-col gap-4 relative">
+                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-slate-700/30 pb-3">
                     <div class="flex items-center gap-2">
-                        <div class="w-3.5 h-3.5 rounded-full bg-eq shadow-lg shadow-eq/40"></div>
+                        <div class="w-3 h-3 rounded-full bg-eq"></div>
                         <h3 class="text-base font-bold text-white tracking-tight">Parametrický Ekvalizér (PEQ)</h3>
                     </div>
-                    <span class="text-[9px] bg-emerald-950/80 text-emerald-400 border border-emerald-800/60 font-semibold px-2.5 py-1 rounded-full uppercase tracking-wider">
-                        Tahejte uzly přímo v grafu (včetně HPF)
+                    <span class="text-[10px] bg-emerald-950 text-emerald-300 border border-emerald-800 font-semibold px-2 py-0.5 rounded uppercase tracking-wider">
+                        Možnost interaktivního tažení uzlů
                     </span>
                 </div>
 
                 <!-- EQ Graph Canvas Frame -->
-                <div class="relative bg-[#05070a] rounded-xl overflow-hidden border border-slate-950 h-64 shadow-inner">
+                <div class="relative bg-slate-950 rounded-lg overflow-hidden border border-slate-900 h-64">
                     <canvas id="eqCanvas" class="w-full h-full block cursor-crosshair"></canvas>
                 </div>
 
                 <!-- EQ Band Controls -->
-                <div class="grid grid-cols-1 sm:grid-cols-4 gap-3 bg-slate-950/40 p-3 rounded-xl border border-slate-900/60">
+                <div class="grid grid-cols-1 sm:grid-cols-4 gap-3 bg-slate-900/50 p-3 rounded-lg border border-slate-800">
                     <!-- Band 1: Low -->
-                    <div class="flex flex-col gap-1 sm:border-r border-slate-800/60 sm:pr-2 last:border-0">
-                        <div class="flex justify-between items-center">
-                            <span class="text-[10px] font-bold text-emerald-400 uppercase">1. LOW (B1)</span>
+                    <div class="flex flex-col gap-1 sm:border-r border-slate-800/80 pr-1 last:border-0">
+                        <div class="flex justify-between items-center mb-1 pb-0.5 border-b border-slate-800/40">
+                            <span class="text-xs font-bold text-emerald-400 uppercase">1. LOW (B1)</span>
+                            <span class="text-xs font-mono text-slate-300 font-semibold" id="eqB1Val">100Hz</span>
                         </div>
-                        <span class="text-[9px] font-mono text-slate-400" id="eqB1Val">100Hz</span>
-                        <label class="text-[8px] text-slate-500 uppercase tracking-widest">Frekvence</label>
-                        <input type="range" id="eqB1Freq" min="20" max="400" value="100" class="w-full eq-thumb h-1 bg-slate-800 rounded">
-                        <label class="text-[8px] text-slate-500 uppercase tracking-widest">Gain</label>
-                        <input type="range" id="eqB1Gain" min="-15" max="15" value="0" step="0.5" class="w-full eq-thumb h-1 bg-slate-800 rounded">
+                        <label class="text-[10px] text-slate-400 font-medium uppercase tracking-wider">Frekvence</label>
+                        <input type="range" id="eqB1Freq" min="20" max="400" value="100" class="w-full eq-thumb h-1 bg-slate-800 rounded cursor-ew-resize">
+                        <label class="text-[10px] text-slate-400 font-medium uppercase tracking-wider">Gain</label>
+                        <input type="range" id="eqB1Gain" min="-15" max="15" value="0" step="0.5" class="w-full eq-thumb h-1 bg-slate-800 rounded cursor-ew-resize">
                     </div>
                     <!-- Band 2: Low Mid -->
-                    <div class="flex flex-col gap-1 sm:border-r border-slate-800/60 sm:pr-2 last:border-0">
-                        <div class="flex justify-between items-center">
-                            <span class="text-[10px] font-bold text-yellow-500 uppercase">2. L-MID (B2)</span>
+                    <div class="flex flex-col gap-1 sm:border-r border-slate-800/80 pr-1 last:border-0">
+                        <div class="flex justify-between items-center mb-1 pb-0.5 border-b border-slate-800/40">
+                            <span class="text-xs font-bold text-yellow-400 uppercase">2. L-MID (B2)</span>
+                            <span class="text-xs font-mono text-slate-300 font-semibold" id="eqB2Val">400Hz</span>
                         </div>
-                        <span class="text-[9px] font-mono text-slate-400" id="eqB2Val">400Hz</span>
-                        <label class="text-[8px] text-slate-500 uppercase tracking-widest">Frekvence</label>
-                        <input type="range" id="eqB2Freq" min="200" max="2000" value="400" class="w-full eq-thumb h-1 bg-slate-800 rounded">
-                        <label class="text-[8px] text-slate-500 uppercase tracking-widest">Gain</label>
-                        <input type="range" id="eqB2Gain" min="-15" max="15" value="0" step="0.5" class="w-full eq-thumb h-1 bg-slate-800 rounded">
+                        <label class="text-[10px] text-slate-400 font-medium uppercase tracking-wider">Frekvence</label>
+                        <input type="range" id="eqB2Freq" min="200" max="2000" value="400" class="w-full eq-thumb h-1 bg-slate-800 rounded cursor-ew-resize">
+                        <label class="text-[10px] text-slate-400 font-medium uppercase tracking-wider">Gain</label>
+                        <input type="range" id="eqB2Gain" min="-15" max="15" value="0" step="0.5" class="w-full eq-thumb h-1 bg-slate-800 rounded cursor-ew-resize">
                     </div>
                     <!-- Band 3: High Mid -->
-                    <div class="flex flex-col gap-1 sm:border-r border-slate-800/60 sm:pr-2 last:border-0">
-                        <div class="flex justify-between items-center">
-                            <span class="text-[10px] font-bold text-cyan-400 uppercase">3. H-MID (B3)</span>
+                    <div class="flex flex-col gap-1 sm:border-r border-slate-800/80 pr-1 last:border-0">
+                        <div class="flex justify-between items-center mb-1 pb-0.5 border-b border-slate-800/40">
+                            <span class="text-xs font-bold text-cyan-400 uppercase">3. H-MID (B3)</span>
+                            <span class="text-xs font-mono text-slate-300 font-semibold" id="eqB3Val">2.5kHz</span>
                         </div>
-                        <span class="text-[9px] font-mono text-slate-400" id="eqB3Val">2.5kHz</span>
-                        <label class="text-[8px] text-slate-500 uppercase tracking-widest">Frekvence</label>
-                        <input type="range" id="eqB3Freq" min="1000" max="8000" value="2500" class="w-full eq-thumb h-1 bg-slate-800 rounded">
-                        <label class="text-[8px] text-slate-500 uppercase tracking-widest">Gain</label>
-                        <input type="range" id="eqB3Gain" min="-15" max="15" value="0" step="0.5" class="w-full eq-thumb h-1 bg-slate-800 rounded">
+                        <label class="text-[10px] text-slate-400 font-medium uppercase tracking-wider">Frekvence</label>
+                        <input type="range" id="eqB3Freq" min="1000" max="8000" value="2500" class="w-full eq-thumb h-1 bg-slate-800 rounded cursor-ew-resize">
+                        <label class="text-[10px] text-slate-400 font-medium uppercase tracking-wider">Gain</label>
+                        <input type="range" id="eqB3Gain" min="-15" max="15" value="0" step="0.5" class="w-full eq-thumb h-1 bg-slate-800 rounded cursor-ew-resize">
                     </div>
                     <!-- Band 4: High -->
                     <div class="flex flex-col gap-1 last:border-0">
-                        <div class="flex justify-between items-center">
-                            <span class="text-[10px] font-bold text-pink-500 uppercase">4. HIGH (B4)</span>
+                        <div class="flex justify-between items-center mb-1 pb-0.5 border-b border-slate-800/40">
+                            <span class="text-xs font-bold text-pink-400 uppercase">4. HIGH (B4)</span>
+                            <span class="text-xs font-mono text-slate-300 font-semibold" id="eqB4Val">10kHz</span>
                         </div>
-                        <span class="text-[9px] font-mono text-slate-400" id="eqB4Val">10kHz</span>
-                        <label class="text-[8px] text-slate-500 uppercase tracking-widest">Frekvence</label>
-                        <input type="range" id="eqB4Freq" min="4000" max="19000" value="10000" class="w-full eq-thumb h-1 bg-slate-800 rounded">
-                        <label class="text-[8px] text-slate-500 uppercase tracking-widest">Gain</label>
-                        <input type="range" id="eqB4Gain" min="-15" max="15" value="0" step="0.5" class="w-full eq-thumb h-1 bg-slate-800 rounded">
+                        <label class="text-[10px] text-slate-400 font-medium uppercase tracking-wider">Frekvence</label>
+                        <input type="range" id="eqB4Freq" min="4000" max="19000" value="10000" class="w-full eq-thumb h-1 bg-slate-800 rounded cursor-ew-resize">
+                        <label class="text-[10px] text-slate-400 font-medium uppercase tracking-wider">Gain</label>
+                        <input type="range" id="eqB4Gain" min="-15" max="15" value="0" step="0.5" class="w-full eq-thumb h-1 bg-slate-800 rounded cursor-ew-resize">
                     </div>
                 </div>
             </div>
@@ -462,7 +474,7 @@
                 categorySlug: "rytmika",
                 type: "continuous",
                 theory: "Přímý DI signál z baskytary je frekvenčně nejčistší a nejvíce stabilní. Základní pevnost tónu leží v pásmu 60–100 Hz. Kritická oblast zahuhlanosti je kolem 200–250 Hz, kde je vhodné spektrum projasnit mírným útlumem. Pro zachování ataku prstů či trsátka mírně podpoříme pásmo 1–1.5 kHz.",
-                practice: "Live zvukaři se shodují, že DI baskytara potřebuje velmi pevnou kompresi k udržení konzistentní úrovně basů pod celou kapelou. Použijte poměr 4:1 s prahem nastaveným tak, aby kompresor pracoval neustále (Gain Reduction cca 4–6 dB). Rychlý attack a střední release zajistí stabilitu.",
+                practice: "Live zvukaři se shodují, že DI baskytara potřebuje velmi pevnou kompresi k udržení koncizní úrovně basů pod celou kapelou. Použijte poměr 4:1 s prahem nastaveným tak, aby kompresor pracoval neustále (Gain Reduction cca 4–6 dB). Rychlý attack a střední release zajistí stabilitu.",
                 hpf: 35,
                 lpf: 8000,
                 eq: [
@@ -928,7 +940,7 @@
                 categorySlug: "brass_sym",
                 type: "sustained",
                 theory: "Tuba představuje extrémní basový základ žesťové sekce. HPF nastavte na 30–35 Hz k odfiltrování seismického dunění. Hlavní energie tónu leží na 45–80 Hz. Kovový prskavý tón ventilů se nachází kolem 1.5 kHz.",
-                practice: "Tuba v orchestru plní roli podobnou baskytaře. Rezonuje v sálech na frekvencích kolem 150 Hz, což je pásmo, které doporučujeme tlumit. Kompresor s poměrem 3:1 s delším attackem podrží stabilitu spodního rejstříku orchestru.",
+                practice: "Tuba v orchestru plní roli podobnou baskytaře. Rezonuje v sálech na frekvencích kolem 150 Hz, což je pásmo, které doporučujeme tlumit. Kompresor s poměrem 3:1 s delším attackem doplňuje stabilitu spodního rejstříku orchestru.",
                 hpf: 35,
                 lpf: 6000,
                 eq: [
@@ -985,7 +997,7 @@
                 name: "Harfa",
                 category: "Celosymfonický orchestr (Perkuse a ost.)",
                 categorySlug: "percussion",
-                type: "plucked",
+                type: "percussion",
                 theory: "Harfa má obrovský frekvenční rozsah s velmi rychlými transienty a dlouhým rezonančním dozvukem. Basový fundament leží na 60–120 Hz. Cinkavost a detail prstů se nachází v pásmu 5–8 kHz. HPF nastavte na 50 Hz.",
                 practice: "Zvučení harfy vyžaduje extrémně citlivý přístup. Pro eliminaci vazby a hučení ozvučné skříně potlačte pásmo 250 Hz. Komprimujte minimálně (poměr 2:1) s pomalým náběhem, aby se nesmazal jemný charakter drnkání.",
                 hpf: 55,
@@ -1001,9 +1013,9 @@
             }
         ];
 
-        // Categories List
+        // Unique categories list - DEFINICE KATEGORIÍ (DŮLEŽITÉ!)
         const categories = [
-            { name: "Všechny nástroje", slug: "all" },
+            { name: "Vše", slug: "all" },
             { name: "Rytmika & Modern", slug: "rytmika" },
             { name: "Vokály", slug: "vokaly" },
             { name: "Big Band Dechy", slug: "brass_bb" },
@@ -1018,6 +1030,9 @@
         let activeCategory = "all";
         let filteredInstruments = [...instrumentDatabase];
         let mockSignalGeneratorInterval = null;
+
+        // Keep a deep copy of original settings for restoring default settings
+        const defaultInstrumentDatabase = JSON.parse(JSON.stringify(instrumentDatabase));
         
         // Signal levels for meters
         let currentInputLevel = -18; // dB
@@ -1106,6 +1121,10 @@
             prevBtn.addEventListener('click', navigatePrevious);
             nextBtn.addEventListener('click', navigateNext);
 
+            // Save and Reset Custom buttons listeners
+            document.getElementById('resetBtn').addEventListener('click', resetToDefaultSettings);
+            document.getElementById('saveBtn').addEventListener('click', saveCustomSettings);
+
             // Listeners for EQ controls
             [eqB1Freq, eqB1Gain, eqB2Freq, eqB2Gain, eqB3Freq, eqB3Gain, eqB4Freq, eqB4Gain].forEach(ctrl => {
                 ctrl.addEventListener('input', updateEQFromControls);
@@ -1129,7 +1148,7 @@
             // Resize listeners to keep canvas graphics crisp
             window.addEventListener('resize', drawAllCanvases);
 
-            // Set up interactive dragging on EQ canvas (includes touch event support for tablets/mobiles!)
+            // Set up interactive dragging on EQ canvas
             setupEQDragging();
         }
 
@@ -1188,6 +1207,7 @@
             loadInstrument(mainIdx);
         }
 
+        // Navigate Next
         function navigateNext() {
             if (filteredInstruments.length === 0) return;
             const currentSelectedId = instrumentDatabase[selectedInstrumentIndex].id;
@@ -1203,6 +1223,17 @@
         function loadInstrument(index) {
             selectedInstrumentIndex = index;
             const inst = instrumentDatabase[index];
+
+            // Load custom overrides from localStorage if saved
+            const savedData = JSON.parse(localStorage.getItem('liveSoundCustomSettings')) || {};
+            if (savedData[inst.id]) {
+                const custom = savedData[inst.id];
+                inst.hpf = custom.hpf;
+                inst.lpf = custom.lpf;
+                inst.eq = custom.eq;
+                inst.gate = custom.gate;
+                inst.comp = custom.comp;
+            }
             
             // Set sync dropdown selection
             instrumentSelect.value = inst.id;
@@ -1216,7 +1247,7 @@
             // Set Numerical summary
             statHPF.innerText = `${inst.hpf} Hz`;
             statGate.innerText = inst.gate.active ? `${inst.gate.th} dB` : 'Bypass';
-            statComp.innerText = inst.comp.active ? `${inst.comp.ratio.toFixed(1)}:1 / ${inst.comp.th}dB` : 'Bypass';
+            statComp.innerText = inst.comp.active ? `${inst.comp.ratio}:1 / ${inst.comp.th}dB` : 'Bypass';
 
             // Sync Sliders/Knobs state
             eqB1Freq.value = inst.eq[0].freq;
@@ -1345,7 +1376,7 @@
             const w = eqCanvas.width;
             const h = eqCanvas.height;
 
-            // SAFE GUARD: Pokud má plátno nulovou velikost (nebylo ještě vykresleno), ukončíme metodu, abychom předešli chybám
+            // SAFE GUARD: Pokud má plátno nulovou velikost, ukončíme metodu
             if (w <= 0 || h <= 0) return;
 
             // 1. Draw Background Grid
@@ -1389,11 +1420,10 @@
             const inst = instrumentDatabase[selectedInstrumentIndex];
             const curvePoints = [];
 
-            // Standard Bell Filters simulator (Gaussian approach for smooth digital-like bell shape)
+            // Standard Bell Filters simulator
             function getBellCurveMultiplier(f, bFreq, bGain, bQ) {
-                // Logarithmic distance to keep bell symmetrical on log scale
                 const dist = Math.log10(f / bFreq);
-                const octWidth = 1.0 / bQ; // Q relation to bandwidth octave wide
+                const octWidth = 1.0 / bQ;
                 const spread = octWidth * 0.4;
                 return bGain * Math.exp(-Math.pow(dist / spread, 2));
             }
@@ -1402,10 +1432,10 @@
             function getHPFMultiplier(f, hFreq) {
                 if (f >= hFreq) {
                     const ratio = hFreq / f;
-                    return -12.0 * Math.pow(ratio, 2); // Approximation of roll-off
+                    return -12.0 * Math.pow(ratio, 2);
                 } else {
                     const ratio = hFreq / f;
-                    return -12.0 * ratio - 6.0; // steeper drop-off below cut-off
+                    return -12.0 * ratio - 6.0;
                 }
             }
 
@@ -1447,7 +1477,6 @@
                 ctx.beginPath();
                 ctx.moveTo(curvePoints[0].x, curvePoints[0].y);
                 for (let i = 1; i < curvePoints.length; i++) {
-                    // Clamp within vertical canvas boundary for aesthetics
                     let cy = Math.max(0, Math.min(h, curvePoints[i].y));
                     ctx.lineTo(curvePoints[i].x, cy);
                 }
@@ -1493,7 +1522,6 @@
         function setupEQDragging() {
             function getMousePos(e) {
                 const rect = eqCanvas.getBoundingClientRect();
-                // Vyrovnání pro dotyk vs myš
                 const clientX = e.touches ? e.touches[0].clientX : e.clientX;
                 const clientY = e.touches ? e.touches[0].clientY : e.clientY;
                 return {
@@ -1540,13 +1568,11 @@
 
                 const inst = instrumentDatabase[selectedInstrumentIndex];
 
-                // Clamp X mouse coord within boundary
                 const cx = Math.max(5, Math.min(w - 5, mouse.x));
                 const cy = Math.max(5, Math.min(h - 5, mouse.y));
 
                 if (isDraggingEQPoint === 'hpf') {
                     let freqVal = Math.round(xToFreq(cx, w));
-                    // Clamp HPF frequency
                     freqVal = Math.max(20, Math.min(1000, freqVal));
                     inst.hpf = freqVal;
                     statHPF.innerText = `${freqVal} Hz`;
@@ -1629,7 +1655,6 @@
 
             const dbLines = [-80, -60, -40, -20, 0];
             dbLines.forEach(db => {
-                // Map to coordinate x/y
                 const ratio = (db + 80) / 80;
                 const x = ratio * w;
                 const y = h - (ratio * h);
@@ -1825,30 +1850,24 @@
         }
 
         // REALTIME SIGNAL GENERATOR SIMULATOR
-        // This loop simulates actual sound input, oscillating back and forth
-        // to show GR meters and curve dots moving dynamically in real time
         function startMockSignalGenerator() {
             let time = 0;
             mockSignalGeneratorInterval = setInterval(() => {
                 time += 0.05;
                 
-                // Get setting from generator level slider
                 const targetBaseLevel = parseInt(sigGenLevel.value);
                 const inst = instrumentDatabase[selectedInstrumentIndex];
                 
-                // Intelligent simulated signal oscillation depending on instrument category (to show active processing visually)
                 let amplitudeOscillation = 0;
                 
                 if (inst.type === "drum") {
-                    // Drum envelope: sharp repetitive transient spikes with rapid exponential decay
                     const pulse = (time * 1.5) % Math.PI; 
                     if (pulse < 0.2) {
-                        amplitudeOscillation = (1 - (pulse / 0.2)) * 35; // aggressive peak spike
+                        amplitudeOscillation = (1 - (pulse / 0.2)) * 35;
                     } else {
-                        amplitudeOscillation = -15 + Math.sin(time * 10) * 2; // quiet decay floor
+                        amplitudeOscillation = -15 + Math.sin(time * 10) * 2;
                     }
                 } else if (inst.type === "plucked") {
-                    // Strummed instrument envelope: slightly softer attack, medium decay
                     const pulse = (time * 1.0) % Math.PI;
                     if (pulse < 0.4) {
                         amplitudeOscillation = (1 - (pulse / 0.4)) * 25;
@@ -1856,16 +1875,13 @@
                         amplitudeOscillation = -10 + Math.sin(time * 5) * 1.5;
                     }
                 } else if (inst.type === "sustained") {
-                    // Vocal/Brass continuous wave: slow smooth oscillations
                     amplitudeOscillation = Math.sin(time * 2) * 15 + Math.cos(time * 0.7) * 4;
                 } else {
-                    // Continuous dense sound (guitars/keys)
                     amplitudeOscillation = Math.sin(time * 4) * 8 + Math.cos(time * 1.5) * 3;
                 }
                 
                 let rawInputLevel = targetBaseLevel + amplitudeOscillation;
                 
-                // Keep input within absolute physical thresholds
                 if (rawInputLevel > 0) rawInputLevel = 0;
                 if (rawInputLevel < -90) rawInputLevel = -90;
 
@@ -1876,7 +1892,6 @@
                     if (currentInputLevel < inst.gate.th) {
                         currentGateGR = inst.gate.range;
                     } else {
-                        // Smooth recovery (release)
                         currentGateGR = Math.max(0, currentGateGR - 2.8);
                     }
                 } else {
@@ -1890,7 +1905,6 @@
                         const targetOut = inst.comp.th + excess / inst.comp.ratio;
                         currentCompGR = Math.abs(currentInputLevel - targetOut);
                     } else {
-                        // Soft release behavior
                         currentCompGR = Math.max(0, currentCompGR - 1.2);
                     }
                 } else {
@@ -1902,17 +1916,78 @@
                 drawCompCanvas();
 
                 // Update UI Meter elements
-                // Gate meter mapping (max range assumed 45dB)
                 const gatePercent = Math.min(100, (currentGateGR / 45) * 100);
                 gateGRBar.style.height = `${gatePercent}%`;
                 gateGRVal.innerText = `-${Math.round(currentGateGR)} dB`;
 
-                // Comp meter mapping (max range assumed 15dB)
                 const compPercent = Math.min(100, (currentCompGR / 15) * 100);
                 compGRBar.style.height = `${compPercent}%`;
                 compGRVal.innerText = `-${Math.round(currentCompGR)} dB`;
 
             }, 50);
+        }
+
+        // Save current UI state of instrument to localStorage
+        function saveCustomSettings() {
+            const inst = instrumentDatabase[selectedInstrumentIndex];
+            const savedData = JSON.parse(localStorage.getItem('liveSoundCustomSettings')) || {};
+            savedData[inst.id] = {
+                hpf: inst.hpf,
+                lpf: inst.lpf,
+                eq: JSON.parse(JSON.stringify(inst.eq)),
+                gate: JSON.parse(JSON.stringify(inst.gate)),
+                comp: JSON.parse(JSON.stringify(inst.comp))
+            };
+            localStorage.setItem('liveSoundCustomSettings', JSON.stringify(savedData));
+            
+            // Dynamic stats reload
+            statHPF.innerText = `${inst.hpf} Hz`;
+            statGate.innerText = inst.gate.active ? `${inst.gate.th} dB` : 'Bypass';
+            statComp.innerText = inst.comp.active ? `${inst.comp.ratio.toFixed(1)}:1 / ${inst.comp.th}dB` : 'Bypass';
+            
+            showToast(`Vlastní nastavení pro "${inst.name}" bylo uloženo!`);
+        }
+
+        // Restore original recommended default settings
+        function resetToDefaultSettings() {
+            const inst = instrumentDatabase[selectedInstrumentIndex];
+            const defaultTemplate = defaultInstrumentDatabase.find(i => i.id === inst.id);
+            if (defaultTemplate) {
+                // Remove custom data from storage
+                const savedData = JSON.parse(localStorage.getItem('liveSoundCustomSettings')) || {};
+                delete savedData[inst.id];
+                localStorage.setItem('liveSoundCustomSettings', JSON.stringify(savedData));
+
+                // Revert runtime database state
+                inst.hpf = defaultTemplate.hpf;
+                inst.lpf = defaultTemplate.lpf;
+                inst.eq = JSON.parse(JSON.stringify(defaultTemplate.eq));
+                inst.gate = JSON.parse(JSON.stringify(defaultTemplate.gate));
+                inst.comp = JSON.parse(JSON.stringify(defaultTemplate.comp));
+
+                // Reload layout views
+                loadInstrument(selectedInstrumentIndex);
+                showToast(`Původní nastavení pro "${inst.name}" bylo obnoveno.`);
+            }
+        }
+
+        // Modern visual feedback toast
+        function showToast(message) {
+            const existingToast = document.getElementById('soundToast');
+            if (existingToast) existingToast.remove();
+
+            const toast = document.createElement('div');
+            toast.id = 'soundToast';
+            toast.className = "fixed bottom-5 right-5 bg-cyan-600 border border-cyan-400 text-white px-4 py-2.5 rounded-lg shadow-2xl text-xs font-bold uppercase tracking-wider transition-all duration-300 z-50 flex items-center gap-2";
+            toast.innerHTML = `
+                <svg class="w-4 h-4 text-emerald-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg>
+                <span>${message}</span>
+            `;
+            document.body.appendChild(toast);
+            setTimeout(() => {
+                toast.classList.add('opacity-0');
+                setTimeout(() => toast.remove(), 300);
+            }, 2500);
         }
 
         // Initialize application on window load
