@@ -1,0 +1,1924 @@
+<!DOCTYPE html>
+<html lang="cs" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LiveSound Channel Strip Simulator & Guide</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        eq: '#10b981',      // Neonově zelená pro EQ
+                        gate: '#f59e0b',    // Oranžová pro Gate
+                        comp: '#06b6d4',    // Tyrkysová pro Comp
+                        darkbg: '#090b11',  // Velmi tmavé moderní pozadí
+                        surface: '#151926', // Panelové karty
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 14px;
+            height: 14px;
+            border-radius: 50%;
+            cursor: pointer;
+            border: 2px solid #ffffff;
+        }
+        .eq-thumb::-webkit-slider-thumb { background: #10b981; box-shadow: 0 0 8px rgba(16, 185, 129, 0.6); }
+        .gate-thumb::-webkit-slider-thumb { background: #f59e0b; box-shadow: 0 0 8px rgba(245, 158, 11, 0.6); }
+        .comp-thumb::-webkit-slider-thumb { background: #06b6d4; box-shadow: 0 0 8px rgba(6, 182, 212, 0.6); }
+        
+        input[type="range"]::-moz-range-thumb {
+            width: 14px;
+            height: 14px;
+            border-radius: 50%;
+            cursor: pointer;
+            border: 2px solid #ffffff;
+        }
+        .eq-thumb::-moz-range-thumb { background: #10b981; }
+        .gate-thumb::-moz-range-thumb { background: #f59e0b; }
+        .comp-thumb::-moz-range-thumb { background: #06b6d4; }
+        
+        /* Skrytí scrollbaru pro čistý design záložek */
+        .scrollbar-none::-webkit-scrollbar {
+            display: none;
+        }
+        .scrollbar-none {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+    </style>
+</head>
+<body class="bg-darkbg text-slate-100 min-h-screen flex flex-col selection:bg-cyan-500 selection:text-darkbg overflow-x-hidden">
+
+    <!-- Top Navigation Header -->
+    <header class="border-b border-slate-800 bg-[#0e111a] px-4 py-3 sticky top-0 z-50 shadow-md">
+        <div class="max-w-7xl mx-auto flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+            <div class="flex items-center gap-3">
+                <div class="p-2 bg-gradient-to-br from-cyan-500 to-emerald-500 rounded-lg text-slate-950 font-extrabold tracking-wider text-xs shadow-lg shadow-cyan-500/10">
+                    STRIP v3.0
+                </div>
+                <div>
+                    <h1 class="text-lg font-bold tracking-tight text-white flex items-center gap-2">
+                        Live Sound Reference Manual
+                    </h1>
+                    <p class="text-[10px] text-slate-400 uppercase tracking-widest font-semibold">60% Odborná literatura | 40% Zvukařská praxe</p>
+                </div>
+            </div>
+
+            <!-- Instrument Selector & Navigation Block -->
+            <div class="flex items-center gap-2 bg-slate-900/95 p-1.5 rounded-xl border border-slate-700/60 self-start md:self-auto w-full md:w-auto shadow-inner">
+                <button id="prevBtn" class="p-2 hover:bg-slate-850 active:scale-95 rounded-lg transition text-slate-400 hover:text-white" title="Předchozí nástroj">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M15 19l-7-7 7-7"/></svg>
+                </button>
+                
+                <select id="instrumentSelect" class="bg-[#151926] text-sm text-white font-semibold border border-slate-700/80 rounded-lg px-3 py-1.5 focus:outline-none focus:ring-2 focus:ring-cyan-500/50 w-full md:w-64 cursor-pointer">
+                    <!-- Budou naplněny dynamicky z JS -->
+                </select>
+
+                <button id="nextBtn" class="p-2 hover:bg-slate-850 active:scale-95 rounded-lg transition text-slate-400 hover:text-white" title="Následující nástroj">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 5l7 7-7 7"/></svg>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Categories Tab Bar -->
+    <div class="bg-[#0b0d14] border-b border-slate-900 px-4 overflow-x-auto whitespace-nowrap scrollbar-none py-2.5">
+        <div class="max-w-7xl mx-auto flex gap-2" id="categoryTabs">
+            <!-- Dynamicky vytvořené kategorie -->
+        </div>
+    </div>
+
+    <!-- Main Content Area -->
+    <main class="max-w-7xl mx-auto p-4 flex-1 grid grid-cols-1 lg:grid-cols-12 gap-6 w-full">
+        
+        <!-- Left Column: Guide Description & Core Stats (5 Cols) -->
+        <section class="lg:col-span-5 flex flex-col gap-5">
+            <!-- General Info Panel -->
+            <div class="bg-surface rounded-2xl border border-slate-800/80 p-5 flex flex-col shadow-xl">
+                <div class="flex items-center justify-between border-b border-slate-800 pb-3.5 mb-4">
+                    <h2 id="activeInstTitle" class="text-xl font-extrabold text-white tracking-tight">--</h2>
+                    <span id="activeInstCategory" class="text-[10px] font-bold px-3 py-1 bg-slate-900 text-slate-300 rounded-full border border-slate-700/80 uppercase tracking-widest">--</span>
+                </div>
+
+                <!-- Theory 60% Section -->
+                <div class="mb-4">
+                    <h3 class="text-[11px] font-extrabold text-emerald-400 uppercase tracking-widest mb-2 flex items-center gap-1.5">
+                        <svg class="w-4 h-4 text-emerald-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/></svg>
+                        Odborná literatura (60%)
+                    </h3>
+                    <p id="theoryText" class="text-slate-300 text-xs sm:text-sm leading-relaxed text-justify bg-slate-950/40 p-3.5 rounded-xl border border-slate-900">
+                        Načítání teoretických dat...
+                    </p>
+                </div>
+
+                <!-- Live Practice 40% Section -->
+                <div>
+                    <h3 class="text-[11px] font-extrabold text-cyan-400 uppercase tracking-widest mb-2 flex items-center gap-1.5">
+                        <svg class="w-4 h-4 text-cyan-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/></svg>
+                        Zvukařská praxe & fora (40%)
+                    </h3>
+                    <p id="practiceText" class="text-slate-300 text-xs sm:text-sm leading-relaxed text-justify bg-slate-950/40 p-3.5 rounded-xl border border-slate-900">
+                        Načítání informací ze zvukařských diskuzí...
+                    </p>
+                </div>
+            </div>
+
+            <!-- Channel Settings Numerical Summary -->
+            <div class="bg-surface rounded-2xl border border-slate-800/80 p-4 shadow-xl">
+                <h3 class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-3 pb-2 border-b border-slate-800">Doporučené Výchozí Parametry</h3>
+                <div class="grid grid-cols-3 gap-2.5 text-center text-xs">
+                    <div class="bg-[#0b0d14]/80 p-2.5 rounded-xl border border-slate-800/80">
+                        <span class="block text-[9px] text-slate-500 font-bold uppercase mb-1">High-Pass Filter</span>
+                        <span id="statHPF" class="font-mono text-emerald-400 font-bold text-sm">-- Hz</span>
+                    </div>
+                    <div class="bg-[#0b0d14]/80 p-2.5 rounded-xl border border-slate-800/80">
+                        <span class="block text-[9px] text-slate-500 font-bold uppercase mb-1">Gate Threshold</span>
+                        <span id="statGate" class="font-mono text-amber-500 font-bold text-sm">Bypass</span>
+                    </div>
+                    <div class="bg-[#0b0d14]/80 p-2.5 rounded-xl border border-slate-800/80">
+                        <span class="block text-[9px] text-slate-500 font-bold uppercase mb-1">Comp Ratio / Th</span>
+                        <span id="statComp" class="font-mono text-cyan-400 font-bold text-sm">--</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Signal Generator Mock Controller -->
+            <div class="bg-[#0a0d14] border border-slate-800/90 rounded-2xl p-4 flex flex-col gap-3">
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center gap-2">
+                        <span class="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse shadow-md shadow-emerald-500/50"></span>
+                        <span class="text-[11px] font-bold uppercase tracking-wider text-slate-300">Generátor Testovacího Signálu</span>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <span class="text-[10px] text-slate-400 font-bold uppercase">Bypass</span>
+                        <input type="checkbox" id="bypassProcessing" class="w-4 h-4 accent-cyan-500 cursor-pointer rounded">
+                    </div>
+                </div>
+                <p class="text-[11px] text-slate-400 leading-relaxed">
+                    Simuluje realistickou herní dynamiku vybraného nástroje (rázy pro bicí, vlnové vibrace pro zpěv a dechy). Sledujte dynamickou reakci brány i kompresoru na grafech vpravo.
+                </p>
+                <div class="flex items-center gap-4 bg-slate-950/60 p-3 rounded-xl border border-slate-900">
+                    <div class="flex-1">
+                        <span class="text-[9px] text-slate-500 uppercase font-bold block mb-1">Síla Vstupního Signálu</span>
+                        <input type="range" id="sigGenLevel" min="-60" max="0" value="-18" class="w-full accent-cyan-500 h-1 bg-slate-800 rounded-lg cursor-pointer">
+                    </div>
+                    <div class="w-16 text-right font-mono text-xs text-slate-300 font-bold" id="sigGenLevelVal">
+                        -18 dB
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Right Column: Graphs Dashboard (7 Cols) -->
+        <section class="lg:col-span-7 flex flex-col gap-5">
+            
+            <!-- Graphic Equalizer Card -->
+            <div class="bg-surface rounded-2xl border border-slate-800/80 p-5 shadow-xl flex flex-col gap-4 relative">
+                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-slate-800 pb-3">
+                    <div class="flex items-center gap-2">
+                        <div class="w-3.5 h-3.5 rounded-full bg-eq shadow-lg shadow-eq/40"></div>
+                        <h3 class="text-base font-bold text-white tracking-tight">Parametrický Ekvalizér (PEQ)</h3>
+                    </div>
+                    <span class="text-[9px] bg-emerald-950/80 text-emerald-400 border border-emerald-800/60 font-semibold px-2.5 py-1 rounded-full uppercase tracking-wider">
+                        Tahejte uzly přímo v grafu (včetně HPF)
+                    </span>
+                </div>
+
+                <!-- EQ Graph Canvas Frame -->
+                <div class="relative bg-[#05070a] rounded-xl overflow-hidden border border-slate-950 h-64 shadow-inner">
+                    <canvas id="eqCanvas" class="w-full h-full block cursor-crosshair"></canvas>
+                </div>
+
+                <!-- EQ Band Controls -->
+                <div class="grid grid-cols-1 sm:grid-cols-4 gap-3 bg-slate-950/40 p-3 rounded-xl border border-slate-900/60">
+                    <!-- Band 1: Low -->
+                    <div class="flex flex-col gap-1 sm:border-r border-slate-800/60 sm:pr-2 last:border-0">
+                        <div class="flex justify-between items-center">
+                            <span class="text-[10px] font-bold text-emerald-400 uppercase">1. LOW (B1)</span>
+                        </div>
+                        <span class="text-[9px] font-mono text-slate-400" id="eqB1Val">100Hz</span>
+                        <label class="text-[8px] text-slate-500 uppercase tracking-widest">Frekvence</label>
+                        <input type="range" id="eqB1Freq" min="20" max="400" value="100" class="w-full eq-thumb h-1 bg-slate-800 rounded">
+                        <label class="text-[8px] text-slate-500 uppercase tracking-widest">Gain</label>
+                        <input type="range" id="eqB1Gain" min="-15" max="15" value="0" step="0.5" class="w-full eq-thumb h-1 bg-slate-800 rounded">
+                    </div>
+                    <!-- Band 2: Low Mid -->
+                    <div class="flex flex-col gap-1 sm:border-r border-slate-800/60 sm:pr-2 last:border-0">
+                        <div class="flex justify-between items-center">
+                            <span class="text-[10px] font-bold text-yellow-500 uppercase">2. L-MID (B2)</span>
+                        </div>
+                        <span class="text-[9px] font-mono text-slate-400" id="eqB2Val">400Hz</span>
+                        <label class="text-[8px] text-slate-500 uppercase tracking-widest">Frekvence</label>
+                        <input type="range" id="eqB2Freq" min="200" max="2000" value="400" class="w-full eq-thumb h-1 bg-slate-800 rounded">
+                        <label class="text-[8px] text-slate-500 uppercase tracking-widest">Gain</label>
+                        <input type="range" id="eqB2Gain" min="-15" max="15" value="0" step="0.5" class="w-full eq-thumb h-1 bg-slate-800 rounded">
+                    </div>
+                    <!-- Band 3: High Mid -->
+                    <div class="flex flex-col gap-1 sm:border-r border-slate-800/60 sm:pr-2 last:border-0">
+                        <div class="flex justify-between items-center">
+                            <span class="text-[10px] font-bold text-cyan-400 uppercase">3. H-MID (B3)</span>
+                        </div>
+                        <span class="text-[9px] font-mono text-slate-400" id="eqB3Val">2.5kHz</span>
+                        <label class="text-[8px] text-slate-500 uppercase tracking-widest">Frekvence</label>
+                        <input type="range" id="eqB3Freq" min="1000" max="8000" value="2500" class="w-full eq-thumb h-1 bg-slate-800 rounded">
+                        <label class="text-[8px] text-slate-500 uppercase tracking-widest">Gain</label>
+                        <input type="range" id="eqB3Gain" min="-15" max="15" value="0" step="0.5" class="w-full eq-thumb h-1 bg-slate-800 rounded">
+                    </div>
+                    <!-- Band 4: High -->
+                    <div class="flex flex-col gap-1 last:border-0">
+                        <div class="flex justify-between items-center">
+                            <span class="text-[10px] font-bold text-pink-500 uppercase">4. HIGH (B4)</span>
+                        </div>
+                        <span class="text-[9px] font-mono text-slate-400" id="eqB4Val">10kHz</span>
+                        <label class="text-[8px] text-slate-500 uppercase tracking-widest">Frekvence</label>
+                        <input type="range" id="eqB4Freq" min="4000" max="19000" value="10000" class="w-full eq-thumb h-1 bg-slate-800 rounded">
+                        <label class="text-[8px] text-slate-500 uppercase tracking-widest">Gain</label>
+                        <input type="range" id="eqB4Gain" min="-15" max="15" value="0" step="0.5" class="w-full eq-thumb h-1 bg-slate-800 rounded">
+                    </div>
+                </div>
+            </div>
+
+            <!-- Dynamics Dashboard (Gate & Comp side-by-side) -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+                
+                <!-- Noise Gate Card -->
+                <div class="bg-surface rounded-2xl border border-slate-800/80 p-4 shadow-xl flex flex-col gap-3">
+                    <div class="flex items-center justify-between border-b border-slate-800 pb-2">
+                        <div class="flex items-center gap-2">
+                            <div class="w-3 h-3 rounded-full bg-gate shadow shadow-gate/40"></div>
+                            <h4 class="text-xs font-extrabold text-white uppercase tracking-wider">Noise Gate</h4>
+                        </div>
+                        <label class="inline-flex items-center gap-1.5 text-[9px] text-slate-400 font-extrabold uppercase cursor-pointer">
+                            Aktivní
+                            <input type="checkbox" id="gateEnable" class="accent-amber-500 rounded">
+                        </label>
+                    </div>
+
+                    <div class="grid grid-cols-12 gap-3">
+                        <!-- Mini Gate Graph -->
+                        <div class="col-span-8 bg-[#05070a] rounded-xl overflow-hidden border border-slate-950 h-40 relative">
+                            <canvas id="gateCanvas" class="w-full h-full block"></canvas>
+                        </div>
+                        <!-- Meter Panel -->
+                        <div class="col-span-4 flex flex-col justify-between bg-slate-950/80 rounded-xl border border-slate-900 p-2">
+                            <div class="flex-1 flex flex-col justify-end">
+                                <span class="text-[8px] font-extrabold text-amber-500 uppercase block text-center tracking-wider mb-1">Gate GR</span>
+                                <div class="w-full bg-slate-900 rounded-md h-20 relative overflow-hidden flex flex-col justify-end">
+                                    <div id="gateGRBar" class="w-full bg-gradient-to-t from-red-600 via-amber-500 to-amber-300 transition-all duration-75" style="height: 0%;"></div>
+                                </div>
+                            </div>
+                            <div class="text-center mt-2 border-t border-slate-900 pt-1.5">
+                                <span id="gateGRVal" class="font-mono text-xs text-amber-400 font-bold">0 dB</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Mini Gate Controls -->
+                    <div class="grid grid-cols-2 gap-3 text-xs bg-slate-950/30 p-2.5 rounded-xl border border-slate-900">
+                        <div>
+                            <div class="flex justify-between items-center text-[9px] text-slate-400 mb-1 font-bold">
+                                <span>THRESHOLD</span>
+                                <span id="gateThVal" class="font-mono font-bold text-amber-400">-45dB</span>
+                            </div>
+                            <input type="range" id="gateTh" min="-80" max="-10" value="-45" class="w-full gate-thumb h-1 bg-slate-800 rounded">
+                        </div>
+                        <div>
+                            <div class="flex justify-between items-center text-[9px] text-slate-400 mb-1 font-bold">
+                                <span>FLOOR RANGE</span>
+                                <span id="gateRangeVal" class="font-mono font-bold text-amber-400">40dB</span>
+                            </div>
+                            <input type="range" id="gateRange" min="5" max="60" value="40" class="w-full gate-thumb h-1 bg-slate-800 rounded">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Compressor Card -->
+                <div class="bg-surface rounded-2xl border border-slate-800/80 p-4 shadow-xl flex flex-col gap-3">
+                    <div class="flex items-center justify-between border-b border-slate-800 pb-2">
+                        <div class="flex items-center gap-2">
+                            <div class="w-3 h-3 rounded-full bg-comp shadow shadow-comp/40"></div>
+                            <h4 class="text-xs font-extrabold text-white uppercase tracking-wider">Compressor</h4>
+                        </div>
+                        <label class="inline-flex items-center gap-1.5 text-[9px] text-slate-400 font-extrabold uppercase cursor-pointer">
+                            Aktivní
+                            <input type="checkbox" id="compEnable" class="accent-cyan-500 rounded">
+                        </label>
+                    </div>
+
+                    <div class="grid grid-cols-12 gap-3">
+                        <!-- Mini Comp Graph -->
+                        <div class="col-span-8 bg-[#05070a] rounded-xl overflow-hidden border border-slate-950 h-40 relative">
+                            <canvas id="compCanvas" class="w-full h-full block"></canvas>
+                        </div>
+                        <!-- Meter Panel -->
+                        <div class="col-span-4 flex flex-col justify-between bg-slate-950/80 rounded-xl border border-slate-900 p-2">
+                            <div class="flex-1 flex flex-col justify-end">
+                                <span class="text-[8px] font-extrabold text-cyan-400 uppercase block text-center tracking-wider mb-1">Gain Red.</span>
+                                <div class="w-full bg-slate-900 rounded-md h-20 relative overflow-hidden flex flex-col justify-end">
+                                    <div id="compGRBar" class="w-full bg-gradient-to-t from-red-600 via-cyan-500 to-cyan-300 transition-all duration-75" style="height: 0%;"></div>
+                                </div>
+                            </div>
+                            <div class="text-center mt-2 border-t border-slate-900 pt-1.5">
+                                <span id="compGRVal" class="font-mono text-xs text-cyan-400 font-bold">0 dB</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Mini Comp Controls -->
+                    <div class="grid grid-cols-2 gap-3 text-xs bg-slate-950/30 p-2.5 rounded-xl border border-slate-900">
+                        <div>
+                            <div class="flex justify-between items-center text-[9px] text-slate-400 mb-1 font-bold">
+                                <span>THRESHOLD</span>
+                                <span id="compThVal" class="font-mono font-bold text-cyan-400">-18dB</span>
+                            </div>
+                            <input type="range" id="compTh" min="-60" max="0" value="-18" class="w-full comp-thumb h-1 bg-slate-800 rounded">
+                        </div>
+                        <div>
+                            <div class="flex justify-between items-center text-[9px] text-slate-400 mb-1 font-bold">
+                                <span>RATIO</span>
+                                <span id="compRatioVal" class="font-mono font-bold text-cyan-400">3.0:1</span>
+                            </div>
+                            <input type="range" id="compRatio" min="1" max="10" step="0.5" value="3" class="w-full comp-thumb h-1 bg-slate-800 rounded">
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+        </section>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="mt-auto border-t border-slate-900 bg-[#07090f] text-center text-[11px] text-slate-500 py-4 px-4 flex flex-col gap-2 shadow-inner">
+        <p>Interaktivní modelace vytvořena na základě vědeckých studií a diskusních panelů AES / Mixing Station.</p>
+        <div class="flex flex-wrap justify-center gap-x-4 gap-y-1 text-[10px] text-slate-600">
+            <span>Zdrojové prameny:</span>
+            <span>Yamaha Sound Reinforcement Handbook</span>
+            <span>Bobby Owsinski: The Mixing Engineer's Handbook</span>
+            <span>Mixing Station User Manual & ProSoundWeb Live Forums</span>
+        </div>
+    </footer>
+
+    <!-- Comprehensive Instrument Database & Core logic -->
+    <script>
+        // Database of 30 Instruments with detailed properties and educational summaries
+        const instrumentDatabase = [
+            // --- 1. RYTMIKA A MODERNÍ SEKCE ---
+            {
+                id: "kick",
+                name: "Kick / Velký buben",
+                category: "Rytmika a moderní sekce",
+                categorySlug: "rytmika",
+                type: "drum",
+                theory: "Dle odborné literatury (Yamaha Handbook) je základní rezonance velkého bubnu situována mezi 50–80 Hz. Nejdůležitější úprava spočívá v potlačení pásma 'krabicovosti' v oblasti 300–400 Hz (často až o -6 dB až -10 dB s širším Q), což uvolní frekvenční spektrum pro baskytaru. Klik beateru (útok kladívka) se nachází v rozmezí 2.5–5 kHz a dodává kopáku čitelnost v hutném aranžmá.",
+                practice: "Live zvukaři na fórech doporučují pro moderní rock/pop agresivní gating pro eliminaci přeslechů z činelů a virblu. Attack nastavte co nejrychlejší (pod 1 ms), aby nezanikl transient. Pokud hraje bubeník dvojšlapku, release musí být velmi rychlý (kolem 100-150 ms). Na compressor použijte pomalejší attack (30 ms) pro zachování přirozeného transientu bubnu a rychlý release.",
+                hpf: 30,
+                lpf: 12000,
+                eq: [
+                    { freq: 60, gain: 4, q: 1.5 },   // Sub / Body
+                    { freq: 350, gain: -8, q: 0.8 }, // Boxy cut
+                    { freq: 3200, gain: 5, q: 1.5 }, // Beater click
+                    { freq: 8000, gain: 0, q: 1.0 }  // High end air
+                ],
+                gate: { active: true, th: -42, range: 45, attack: 0.5, release: 150 },
+                comp: { active: true, th: -15, ratio: 4.5, attack: 30, release: 120 }
+            },
+            {
+                id: "snare",
+                name: "Snare / Malý buben",
+                category: "Rytmika a moderní sekce",
+                categorySlug: "rytmika",
+                type: "drum",
+                theory: "Virbl vyžaduje tělo v oblasti 150–240 Hz. Klíčové kritické rezonance se nacházejí kolem 800 Hz až 1 kHz (kovové zvonění), které literatura doporučuje filtrovat úzkým parametrickým zářezem. Ostrost a prasknutí bubnu (crack) se nachází na 4–5 kHz. Šum struníku (snare wires) lze podpořit jemným high-shelving filtrem nad 8 kHz.",
+                practice: "Na živých koncertech je hard-gating virblu riskantní, protože bubeník často hraje jemné ghost-noty, které by gate uřízl. Zvukaři z Mixing Station fór doporučují spíše mírný expander s rozsahem (range) pouze -15 dB. Compressor nastavený s attackem 15 ms propustí úder dřeva paličky a následně zkomprimuje tělo a struník. Poměr 3.5:1.",
+                hpf: 90,
+                lpf: 15000,
+                eq: [
+                    { freq: 180, gain: 3, q: 1.2 },
+                    { freq: 900, gain: -5, q: 3.0 },
+                    { freq: 4500, gain: 4, q: 1.5 },
+                    { freq: 10000, gain: 2, q: 1.0 }
+                ],
+                gate: { active: true, th: -38, range: 15, attack: 1.0, release: 250 },
+                comp: { active: true, th: -14, ratio: 3.5, attack: 15, release: 150 }
+            },
+            {
+                id: "toms",
+                name: "Toms / Přechody",
+                category: "Rytmika a moderní sekce",
+                categorySlug: "rytmika",
+                type: "drum",
+                theory: "Přechody vyžadují podobné frekvenční ošetření jako kopák, ale posunuté výše podle velikosti korpusu. Tělo (boom) leží na 90–150 Hz u rack tomů, a na 80 Hz u floor tomů. Dutost odstraňujeme na 500–600 Hz. Kontaktní úder blány podpoříme na 3–4 kHz.",
+                practice: "V živém zvučení jsou tomy největším zdrojem nechtěného hučení celého pódiového mixu. Zde je striktní nastavení gate naprostou nutností. Práh (Threshold) nastavte přesně nad úroveň okolního hluku činelů. Attack bleskově rychlý, hold 100 ms, release cca 300-400 ms, aby tom přirozeně dozněl, ale ihned poté se gate zavřel.",
+                hpf: 75,
+                lpf: 12000,
+                eq: [
+                    { freq: 110, gain: 3, q: 1.5 },
+                    { freq: 500, gain: -7, q: 1.0 },
+                    { freq: 3500, gain: 4, q: 1.5 },
+                    { freq: 9000, gain: 0, q: 1.0 }
+                ],
+                gate: { active: true, th: -35, range: 40, attack: 0.8, release: 350 },
+                comp: { active: true, th: -16, ratio: 4.0, attack: 20, release: 200 }
+            },
+            {
+                id: "overheads",
+                name: "Overheads / Činely",
+                category: "Rytmika a moderní sekce",
+                categorySlug: "rytmika",
+                type: "sustained",
+                theory: "V klasické literatuře jsou overheady brány jako obraz celé bicí soupravy. V moderním živém mixu se však používají spíše jako bodové mikrofony pro činely. Proto se doporučuje razantní High-Pass filter až na 350 Hz k eliminaci basového dunění pódia a kopáku. Pásmo 3–5 kHz se často tlumí pro eliminaci agresivního 'syčení' levnějších činelů.",
+                practice: "Gate na overheady zásadně nepoužíváme (bypass). Komprese se aplikuje velmi jemně (např. 2:1, high threshold), pouze ke zkrocení špiček hlasitých činelů crash. Příliš komprimované overheady způsobují, že činely v mixu nepříjemně pumpují a tahají za uši.",
+                hpf: 350,
+                lpf: 19000,
+                eq: [
+                    { freq: 400, gain: -3, q: 1.0 },
+                    { freq: 4000, gain: -2, q: 1.0 },
+                    { freq: 8000, gain: 2, q: 1.2 },
+                    { freq: 12000, gain: 3, q: 0.8 }
+                ],
+                gate: { active: false, th: -75, range: 5, attack: 1, release: 100 },
+                comp: { active: true, th: -10, ratio: 2.0, attack: 10, release: 100 }
+            },
+            {
+                id: "bass_di",
+                name: "Baskytara (DI signál)",
+                category: "Rytmika a moderní sekce",
+                categorySlug: "rytmika",
+                type: "continuous",
+                theory: "Přímý DI signál z baskytary je frekvenčně nejčistší a nejvíce stabilní. Základní pevnost tónu leží v pásmu 60–100 Hz. Kritická oblast zahuhlanosti je kolem 200–250 Hz, kde je vhodné spektrum projasnit mírným útlumem. Pro zachování ataku prstů či trsátka mírně podpoříme pásmo 1–1.5 kHz.",
+                practice: "Live zvukaři se shodují, že DI baskytara potřebuje velmi pevnou kompresi k udržení konzistentní úrovně basů pod celou kapelou. Použijte poměr 4:1 s prahem nastaveným tak, aby kompresor pracoval neustále (Gain Reduction cca 4–6 dB). Rychlý attack a střední release zajistí stabilitu.",
+                hpf: 35,
+                lpf: 8000,
+                eq: [
+                    { freq: 80, gain: 2, q: 1.2 },
+                    { freq: 220, gain: -4, q: 1.0 },
+                    { freq: 1200, gain: 3, q: 1.5 },
+                    { freq: 4000, gain: 0, q: 1.0 }
+                ],
+                gate: { active: false, th: -80, range: 0, attack: 1, release: 100 },
+                comp: { active: true, th: -18, ratio: 4.0, attack: 10, release: 180 }
+            },
+            {
+                id: "bass_amp",
+                name: "Baskytara (Aparát)",
+                category: "Rytmika a moderní sekce",
+                categorySlug: "rytmika",
+                type: "continuous",
+                theory: "Mikrofon před baskytarovým aparátem přirozeně ořezává extrémní subbasy i výšky. Barva zvuku je však teplejší a obsahuje harmonické zkreslení. Doporučuje se HPF na 45 Hz a mírný ořez na 300 Hz. Pro prosazení nástroje v mixu se doporučuje mírný boost středů na 800 Hz.",
+                practice: "Při kombinaci s DI signálem dbejte na fázovou korelaci (případně otočte polaritu na jednom z kanálů!). Na mikrofonním kanálu komprimujte o něco méně než na DI, nechte více vyniknout dynamiku aparátu. Gate se obvykle nepoužívá, pokud aparát příliš nešumí.",
+                hpf: 45,
+                lpf: 6500,
+                eq: [
+                    { freq: 100, gain: 1, q: 1.2 },
+                    { freq: 300, gain: -3, q: 1.0 },
+                    { freq: 800, gain: 3, q: 1.4 },
+                    { freq: 3000, gain: -2, q: 1.0 }
+                ],
+                gate: { active: false, th: -80, range: 0, attack: 1, release: 100 },
+                comp: { active: true, th: -12, ratio: 3.0, attack: 15, release: 150 }
+            },
+            {
+                id: "el_gtr_rhy",
+                name: "Elektrická kytara (Doprovod)",
+                category: "Rytmika a moderní sekce",
+                categorySlug: "rytmika",
+                type: "continuous",
+                theory: "Zkreslená doprovodná kytara nepotřebuje žádné hluboké basy – ty patří baskytaře. HPF nastavte nekompromisně na 110 Hz. Hlavní rezonance 'bláta' odstraňte na 250 Hz. Nejvíce agresivní frekvence způsobující únavu uší leží na 3–4 kHz, kde se doporučuje jemný útlum. Nad 8 kHz zvuk kytary obsahuje pouze nepříjemný šum, použijte proto LPF na 9.5 kHz.",
+                practice: "U moderních hi-gain kytar je klíčové nastavení gate pro utlumení šumu při stop-timech. Nastavte gate s rychlým attackem a středním release tak, aby při ztlumení strun kytaristou okamžitě zavřel. Komprese se u zkreslených kytar nepoužívá, protože zkreslení samo o sobě signál extrémně komprimuje.",
+                hpf: 110,
+                lpf: 9500,
+                eq: [
+                    { freq: 150, gain: -2, q: 1.0 },
+                    { freq: 250, gain: -4, q: 1.5 },
+                    { freq: 3500, gain: -3, q: 2.0 },
+                    { freq: 6000, gain: 1, q: 1.0 }
+                ],
+                gate: { active: true, th: -48, range: 40, attack: 1.0, release: 120 },
+                comp: { active: false, th: -10, ratio: 2.0, attack: 15, release: 100 }
+            },
+            {
+                id: "el_gtr_lead",
+                name: "Elektrická kytara (Sólo)",
+                category: "Rytmika a moderní sekce",
+                categorySlug: "rytmika",
+                type: "continuous",
+                theory: "Sólová kytara se musí v mixu prosadit nad doprovody. Klíčové frekvence pro 'zpěvnost' tónu leží ve středním pásmu mezi 1.2–2.5 kHz. Jemným širokým boostem v této oblasti vytáhnete sólo dopředu bez nutnosti zvyšování celkové šavle hlasitosti.",
+                practice: "Pro sóla se naopak mírná komprese velmi doporučuje. Pomůže prodloužit sustain kytary a vyrovnat tóny při technických pasážích (legato, tapping). Nastavte attack 10 ms a delší release pro přirozené doznívání. Gate nastavte volněji než u doprovodů.",
+                hpf: 90,
+                lpf: 8500,
+                eq: [
+                    { freq: 180, gain: 1, q: 1.0 },
+                    { freq: 600, gain: -2, q: 1.0 },
+                    { freq: 1800, gain: 4, q: 1.2 },
+                    { freq: 4000, gain: 2, q: 1.0 }
+                ],
+                gate: { active: true, th: -55, range: 30, attack: 2.0, release: 200 },
+                comp: { active: true, th: -18, ratio: 3.0, attack: 10, release: 250 }
+            },
+            {
+                id: "ac_gtr",
+                name: "Akustická kytara (Snímač)",
+                category: "Rytmika a moderní sekce",
+                categorySlug: "rytmika",
+                type: "plucked",
+                theory: "Akustická kytara snímaná přes piezo snímač mívá velmi ostrý a nepřirozeně tvrdý zvuk. HPF nastavte na 120 Hz pro eliminaci dunění těla. Typický piezoelektrický 'kvákavý' tón odstraňte hlubokým ořezem na 800 Hz až 1.2 kHz. Projasnění strun docílíte boostem na 10–12 kHz.",
+                practice: "Akustická kytara má obrovský dynamický rozsah. Zvukaři z praxe doporučují rychlý kompresor s poměrem 3:1 a rychlým časem attacku k zachycení agresivního brnkání trsátka. Gate nepoužíváme, leda jemný expander v hlučném pódiovém prostředí.",
+                hpf: 130,
+                lpf: 14000,
+                eq: [
+                    { freq: 200, gain: -3, q: 1.2 },
+                    { freq: 950, gain: -6, q: 2.0 }, // Piezo honk cut
+                    { freq: 3200, gain: 2, q: 1.0 },
+                    { freq: 11000, gain: 4, q: 0.8 }
+                ],
+                gate: { active: false, th: -80, range: 0, attack: 5, release: 200 },
+                comp: { active: true, th: -15, ratio: 3.0, attack: 8, release: 120 }
+            },
+            {
+                id: "keys_piano",
+                name: "Klávesy / Klavír",
+                category: "Rytmika a moderní sekce",
+                categorySlug: "rytmika",
+                type: "continuous",
+                theory: "Klavír pokrývá téměř celé slyšitelné spektrum. V kapele se však často pere s kopákem, baskytarou i zpěvem. Odborná literatura radí oříznout spodek (HPF) na 80 Hz (u doprovodného piana klidně až na 120 Hz). Pásmo 250–350 Hz se tlumí, pokud piano zní moc temně a zahlcuje mix.",
+                practice: "Živý klavír má extrémně rychlé špičky, které mohou přebuzovat vstupy. Doporučuje se jemná multibandová komprese nebo klasický RMS kompresor s poměrem 2.2:1 a pomalejším attackem (25 ms), aby nedošlo k udušení dynamiky hry klavíristy.",
+                hpf: 85,
+                lpf: 16000,
+                eq: [
+                    { freq: 120, gain: -2, q: 1.0 },
+                    { freq: 300, gain: -4, q: 1.2 },
+                    { freq: 2500, gain: 2, q: 1.0 },
+                    { freq: 8000, gain: 2, q: 0.8 }
+                ],
+                gate: { active: false, th: -80, range: 0, attack: 10, release: 300 },
+                comp: { active: true, th: -12, ratio: 2.2, attack: 25, release: 180 }
+            },
+
+            // --- 2. VOKÁLY ---
+            {
+                id: "male_vox",
+                name: "Mužský zpěv (Hlavní)",
+                category: "Vokály",
+                categorySlug: "vokaly",
+                type: "sustained",
+                theory: "Základní tón mužského hlasu leží v rozmezí 100–150 Hz. HPF se nastavuje na 100 Hz k potlačení manipulačního hluku mikrofonu a proximity efektu. 'Krabicovost' a zahuhlanost se odstraňuje na 300–400 Hz. Srozumitelnost textu a prezence leží na 2.5–3 kHz. Sykavky se nacházejí kolem 5–7 kHz.",
+                practice: "Na živých koncertech je zpěv nejdůležitějším prvkem. Live zvukaři doporučují kompresor: poměr 3:1, attack středně rychlý (10 ms) pro zachování artikulace, release 150 ms. Použijte expander pro ztišení mikrofonu, když zpěvák nezpívá, čímž omezíte přeslechy a vazbení monitorů.",
+                hpf: 105,
+                lpf: 16000,
+                eq: [
+                    { freq: 350, gain: -4, q: 1.2 },
+                    { freq: 1500, gain: 1, q: 1.0 },
+                    { freq: 2800, gain: 3, q: 1.2 }, // Clarity
+                    { freq: 12000, gain: 3, q: 0.8 }  // Air
+                ],
+                gate: { active: true, th: -55, range: 12, attack: 5.0, release: 300 }, // Expander style
+                comp: { active: true, th: -16, ratio: 3.0, attack: 10, release: 150 }
+            },
+            {
+                id: "male_vox_back",
+                name: "Mužský zpěv (Doprovodný)",
+                category: "Vokály",
+                categorySlug: "vokaly",
+                type: "sustained",
+                theory: "Doprovodný zpěv by měl vytvářet harmonické pozadí a nesmí konkurovat sólovému vokálu. Doporučuje se agresivnější HPF až na 130 Hz k vyčištění spodního spektra a širší tlumící filtry v oblasti 1-3 kHz, čímž vznikne prostor pro hlavní vokál.",
+                practice: "Aby doprovodné vokály tvořily celistvou stěnu a 'nevyčnívaly', komprimujte je silněji (poměr 4:1) s nízkým prahem (Threshold). Rychlý attack utlumí transienty a usadí zpěvy pevně do pozadí mixu.",
+                hpf: 130,
+                lpf: 15000,
+                eq: [
+                    { freq: 350, gain: -5, q: 1.2 },
+                    { freq: 1500, gain: -2, q: 1.0 },
+                    { freq: 3000, gain: -3, q: 1.5 },
+                    { freq: 10000, gain: 3, q: 0.8 }
+                ],
+                gate: { active: true, th: -50, range: 15, attack: 5.0, release: 250 },
+                comp: { active: true, th: -20, ratio: 4.0, attack: 8, release: 180 }
+            },
+            {
+                id: "female_vox",
+                name: "Ženský zpěv (Hlavní)",
+                category: "Vokály",
+                categorySlug: "vokaly",
+                type: "sustained",
+                theory: "Ženský hlas má základní tón výše (180–250 Hz). HPF lze nastavit bezpečně na 140–160 Hz bez ztráty přirozenosti. Často se objevuje nepříjemná ostrost kolem 1 kHz (nosovost) a tvrdost na 3.5–4 kHz. Tyto frekvence je vhodné jemně potlačit úzkým filtrem.",
+                practice: "U ženského zpěvu zvukaři bojují se sykavkami, které se nacházejí výše než u mužů – kolem 7–9 kHz. Kompresor nastavte s mírným kolenem (Soft Knee), aby komprese nastupovala plynule. Poměr 3:1 je ideální startovací bod.",
+                hpf: 145,
+                lpf: 18000,
+                eq: [
+                    { freq: 240, gain: -2, q: 1.0 },
+                    { freq: 1000, gain: -3, q: 1.5 }, // Nasal cut
+                    { freq: 4000, gain: -2, q: 1.5 }, // Harshness cut
+                    { freq: 10000, gain: 3, q: 0.8 }  // Silk
+                ],
+                gate: { active: true, th: -55, range: 12, attack: 5.0, release: 300 },
+                comp: { active: true, th: -15, ratio: 3.0, attack: 12, release: 140 }
+            },
+            {
+                id: "female_vox_back",
+                name: "Ženský zpěv (Doprovodný)",
+                category: "Vokály",
+                categorySlug: "vokaly",
+                type: "sustained",
+                theory: "Stejně jako u mužských doprovodů, i zde se doporučuje agresivnější HPF na 160-180 Hz a potlačení středu na 2-3 kHz pro uvolnění prostoru. Vysoký shelving filtr nad 10 kHz dodá vzdušný 'sheen' efekt bez agrese.",
+                practice: "Zde se doporučuje hluboká komprese s poměrem 4:1 k dosažení hladkého a konzistentního doprovodu. Aktivní šumová brána ve formě expanderu na -15 dB zabrání snímání okolního šumu bicích z pódia.",
+                hpf: 170,
+                lpf: 17000,
+                eq: [
+                    { freq: 300, gain: -3, q: 1.0 },
+                    { freq: 1200, gain: -3, q: 1.5 },
+                    { freq: 3500, gain: -3, q: 1.5 },
+                    { freq: 11000, gain: 4, q: 0.8 }
+                ],
+                gate: { active: true, th: -52, range: 15, attack: 5.0, release: 250 },
+                comp: { active: true, th: -22, ratio: 4.0, attack: 10, release: 150 }
+            },
+
+            // --- 3. BIG BAND DECHOVÁ SEKCE ---
+            {
+                id: "trumpet",
+                name: "Trubka (Sólo / Sekce)",
+                category: "Big Band dechová sekce",
+                categorySlug: "brass_bb",
+                type: "sustained",
+                theory: "Trubka je extrémně pronikavý nástroj se silným akustickým tlakem v oblasti vyšších středů. HPF nastavte na 150 Hz. Největší energie trubky se soustředí kolem 1–2 kHz. Velmi často se objevuje řezavá agresivita na 6–7 kHz, kterou literatura doporučuje tlumit.",
+                practice: "V Big Bandu trubky často hrají v sekci obrovské dynamické skoky. Rychlý kompresor s poměrem 4:1 je nezbytný, aby sólové špičky netrhaly uši posluchačům v prvních řadách. Nastavte rychlý attack (5 ms) a rychlý release.",
+                hpf: 150,
+                lpf: 12000,
+                eq: [
+                    { freq: 300, gain: -2, q: 1.0 },
+                    { freq: 1500, gain: 2, q: 1.0 },
+                    { freq: 3500, gain: -1, q: 1.5 },
+                    { freq: 6500, gain: -4, q: 2.0 } // Aggressive sizzle cut
+                ],
+                gate: { active: false, th: -80, range: 0, attack: 5, release: 200 },
+                comp: { active: true, th: -12, ratio: 4.0, attack: 5, release: 120 }
+            },
+            {
+                id: "trombone",
+                name: "Pozoun (Sólo / Sekce)",
+                category: "Big Band dechová sekce",
+                categorySlug: "brass_bb",
+                type: "sustained",
+                theory: "Pozoun má hlubší a vřelejší tón než trubka. Základní tělo leží mezi 100–200 Hz. HPF se nastavuje na 80–90 Hz. Tranzitní prsknutí (bark) pozounu se nachází na 2 kHz.",
+                practice: "Pozoun vyžaduje přirozenou dynamiku, proto komprimujte s nižším poměrem 2.5:1 a středním prahem. Pozor na zahuhlanost v sekci, doporučuje se mírný ořez kolem 300 Hz.",
+                hpf: 85,
+                lpf: 10000,
+                eq: [
+                    { freq: 150, gain: 2, q: 1.2 },
+                    { freq: 320, gain: -4, q: 1.5 }, // Mud cut
+                    { freq: 2000, gain: 3, q: 1.2 }, // Bark
+                    { freq: 5000, gain: 0, q: 1.0 }
+                ],
+                gate: { active: false, th: -80, range: 0, attack: 5, release: 200 },
+                comp: { active: true, th: -14, ratio: 2.5, attack: 15, release: 150 }
+            },
+            {
+                id: "alto_sax",
+                name: "Alt saxofon",
+                category: "Big Band dechová sekce",
+                categorySlug: "brass_bb",
+                type: "sustained",
+                theory: "Alt saxofon má tělo kolem 200–300 Hz. Často trpí na nosový charakter zvuku na 1 kHz a pronikavou ostrost na 3 kHz. HPF nastavte na 110 Hz.",
+                practice: "Live zvukaři rádi přidávají saxofonům 'teplo' mírným boostem na 250 Hz, pokud nehrají s velmi hutným doprovodem. Kompresor pomáhá vyhladit tón, poměr 2.5:1 s attackem 15 ms udrží saxofon v popředí mixu.",
+                hpf: 110,
+                lpf: 14000,
+                eq: [
+                    { freq: 250, gain: 2, q: 1.2 },
+                    { freq: 1000, gain: -3, q: 1.5 }, // Nose cut
+                    { freq: 3000, gain: -2, q: 1.5 }, // Harshness
+                    { freq: 8000, gain: 1, q: 1.0 }
+                ],
+                gate: { active: false, th: -80, range: 0, attack: 5, release: 200 },
+                comp: { active: true, th: -15, ratio: 2.5, attack: 15, release: 150 }
+            },
+            {
+                id: "tenor_sax",
+                name: "Tenor saxofon",
+                category: "Big Band dechová sekce",
+                categorySlug: "brass_bb",
+                type: "sustained",
+                theory: "Tenor saxofon má nízko položené tělo (150 Hz) a bohatou harmonickou strukturu. Prořezává se mixem na 1.5–2 kHz. HPF doporučuje literatura nastavit na 80 Hz.",
+                practice: "V sekci Big Bandu může tenor saxofon maskovat kytary nebo klávesy v nižších středech. Ořez na 350 Hz tento problém řeší. Kompresor s pomalejším release (200 ms) drží zvuk stabilní.",
+                hpf: 85,
+                lpf: 12000,
+                eq: [
+                    { freq: 150, gain: 2, q: 1.2 },
+                    { freq: 350, gain: -4, q: 1.4 },
+                    { freq: 1800, gain: 3, q: 1.2 },
+                    { freq: 6000, gain: 0, q: 1.0 }
+                ],
+                gate: { active: false, th: -80, range: 0, attack: 5, release: 200 },
+                comp: { active: true, th: -14, ratio: 2.5, attack: 12, release: 200 }
+            },
+            {
+                id: "bari_sax",
+                name: "Baryton saxofon",
+                category: "Big Band dechová sekce",
+                categorySlug: "brass_bb",
+                type: "sustained",
+                theory: "Barytonový saxofon plní v sekci často basovou linku. Klíčové je zachovat basový základ na 70–100 Hz. HPF se nastavuje velmi citlivě na 50–60 Hz. Cvakání klapek a dech se nacházejí na 4–5 kHz.",
+                practice: "Komprese baryton saxofonu by měla být pevnější (poměr 3.5:1) podobně jako u baskytary, aby sekce 'šlapala' v nejnižším registru. Ořez na 200 Hz zabrání hučení.",
+                hpf: 55,
+                lpf: 10000,
+                eq: [
+                    { freq: 85, gain: 3, q: 1.5 },
+                    { freq: 200, gain: -4, q: 1.2 },
+                    { freq: 1500, gain: 2, q: 1.0 },
+                    { freq: 4500, gain: 2, q: 1.2 }
+                ],
+                gate: { active: false, th: -80, range: 0, attack: 5, release: 200 },
+                comp: { active: true, th: -16, ratio: 3.5, attack: 10, release: 180 }
+            },
+
+            // --- 4. CELOSYMFONICKÝ ORCHESTR (SMYČCE) ---
+            {
+                id: "violin",
+                name: "Housle (Sekce / Sólo)",
+                category: "Celosymfonický orchestr (Smyčce)",
+                categorySlug: "strings",
+                type: "sustained",
+                theory: "Housle mají velmi komplexní rezonanční spektrum. HPF nastavte na 150 Hz (sólo) až 180 Hz (sekce) pro zamezení subbasových přeslechů od bicích či kontrabasů. Kritické pásmo drsnosti ze smyčce se nachází mezi 2.5–4 kHz. Vzdušnost a brilanci dodává spektrum nad 10 kHz.",
+                practice: "Live zvukaři u akustických houslí bojují s piezosnímači (které znějí příliš plechově a ostře). Doporučuje se úzký ořez na 3.2 kHz a jemná komprese (poměr 2:1) s velmi pomalým attackem i release pro přirozené zachování dynamiky symfonické hudby.",
+                hpf: 170,
+                lpf: 16000,
+                eq: [
+                    { freq: 250, gain: 1, q: 1.0 },
+                    { freq: 1000, gain: -2, q: 1.0 },
+                    { freq: 3200, gain: -5, q: 2.0 }, // Bow screech cut
+                    { freq: 12000, gain: 3, q: 0.8 }  // Brilliance
+                ],
+                gate: { active: false, th: -80, range: 0, attack: 10, release: 500 },
+                comp: { active: true, th: -12, ratio: 2.0, attack: 30, release: 300 }
+            },
+            {
+                id: "viola",
+                name: "Viola",
+                category: "Celosymfonický orchestr (Smyčce)",
+                categorySlug: "strings",
+                type: "sustained",
+                theory: "Viola je větší a laděná níže než housle. Její tělo se nachází na 150–220 Hz. HPF nastavte na 110–120 Hz. Charakteristický dřevěný a lehce temný tón je chráněn udržováním frekvencí kolem 500 Hz.",
+                practice: "Violy v sekci snadno zanikají. Pro jejich zvýraznění pomáhá mírný široký boost na 1.5 kHz. Komprese velmi jemná (poměr 2:1), gate se nepoužívá vůbec.",
+                hpf: 115,
+                lpf: 14000,
+                eq: [
+                    { freq: 180, gain: 2, q: 1.2 },
+                    { freq: 500, gain: 1, q: 1.0 },
+                    { freq: 1500, gain: 3, q: 1.0 },
+                    { freq: 8000, gain: -2, q: 1.0 }
+                ],
+                gate: { active: false, th: -80, range: 0, attack: 10, release: 500 },
+                comp: { active: true, th: -10, ratio: 2.0, attack: 25, release: 250 }
+            },
+            {
+                id: "cello",
+                name: "Violoncelo",
+                category: "Celosymfonický orchestr (Smyčce)",
+                categorySlug: "strings",
+                type: "sustained",
+                theory: "Violoncelo disponuje obrovským tónovým rozsahem. Bohaté teplé tělo leží mezi 80–150 Hz. HPF nastavte na 70 Hz. Skřípání smyčce se nachází na 1.5 kHz, vřelé vyšší harmonické tóny na 500 Hz.",
+                practice: "Při zvučení živého orchestru se violoncella často perou v basovém pásmu s kontrabasy a basovými dechy. Pomůže ořez na 250 Hz. Komprimujte jemně (poměr 2.2:1), abyste zachovali přirozenou dynamiku nástroje.",
+                hpf: 70,
+                lpf: 12000,
+                eq: [
+                    { freq: 120, gain: 3, q: 1.2 },
+                    { freq: 250, gain: -4, q: 1.5 }, // Mud cut
+                    { freq: 600, gain: 2, q: 1.0 },
+                    { freq: 2500, gain: -2, q: 1.5 }
+                ],
+                gate: { active: false, th: -80, range: 0, attack: 10, release: 500 },
+                comp: { active: true, th: -14, ratio: 2.2, attack: 20, release: 220 }
+            },
+            {
+                id: "double_bass",
+                name: "Kontrabas (Smyčec / Piz.)",
+                category: "Celosymfonický orchestr (Smyčce)",
+                categorySlug: "strings",
+                type: "sustained",
+                theory: "Kontrabas je základním kamenem orchestrálního zvuku v nejnižších oktávách. Hlavní energie je na 40–80 Hz. HPF se doporučuje na 35–40 Hz. Prstové klepání o hmatník u sólové hry leží na 1–1.5 kHz.",
+                practice: "Na živém pódiu je kontrabas náchylný k akustické vazbě. Zvukaři doporučují vyřezat rezonující tón pódiu pomocí velmi úzkého filtru (notch) v pásmu 100–180 Hz. Komprese musí být pomalá s poměrem 3:1.",
+                hpf: 38,
+                lpf: 7000,
+                eq: [
+                    { freq: 60, gain: 2, q: 1.4 },
+                    { freq: 140, gain: -5, q: 2.5 }, // Feedback cut
+                    { freq: 800, gain: 1, q: 1.0 },
+                    { freq: 2500, gain: -3, q: 1.5 }
+                ],
+                gate: { active: false, th: -80, range: 0, attack: 10, release: 500 },
+                comp: { active: true, th: -15, ratio: 3.0, attack: 15, release: 300 }
+            },
+
+            // --- 5. CELOSYMFONICKÝ ORCHESTR (DŘEVĚNÉ DECHY) ---
+            {
+                id: "flute",
+                name: "Flétna / Pikola",
+                category: "Celosymfonický orchestr (Dřevěné dechy)",
+                categorySlug: "woodwinds",
+                type: "sustained",
+                theory: "Příčná flétna má jemný základ, který vyžaduje HPF na 250 Hz. Pikola je extrémně vysoký nástroj, u kterého lze nastavit HPF bezpečně na 500–600 Hz. Zvuk dechu při foukání na retnou hranu leží v pásmu 8–10 kHz a je důležitý pro přirozenost zvuku.",
+                practice: "Pikola dokáže být v orchestru nesnesitelně ostrá v nejvyšších registrech. Použijte široký ořez na 4–6 kHz k zaoblení zvuku. Komprese s poměrem 2:1 vyhladí extrémní špičky sólových partů.",
+                hpf: 240,
+                lpf: 18000,
+                eq: [
+                    { freq: 300, gain: -2, q: 1.0 },
+                    { freq: 1200, gain: 1, q: 1.0 },
+                    { freq: 5000, gain: -3, q: 1.5 }, // Piccolo screech cut
+                    { freq: 9500, gain: 3, q: 0.8 }
+                ],
+                gate: { active: false, th: -80, range: 0, attack: 10, release: 400 },
+                comp: { active: true, th: -10, ratio: 2.0, attack: 20, release: 150 }
+            },
+            {
+                id: "oboe",
+                name: "Hoboj",
+                category: "Celosymfonický orchestr (Dřevěné dechy)",
+                categorySlug: "woodwinds",
+                type: "sustained",
+                theory: "Hoboj má typický průrazný, lehce nosový zvuk díky dvojitému plátku. Základní spektrum leží na 250 Hz. Hlavní 'nosovost' se koncentruje kolem 1–1.5 kHz. HPF nastavte na 150 Hz.",
+                practice: "Aby hoboj nezněl příliš ostře a nepříjemně, live zvukaři mírně tlumí pásmo 1.2 kHz a naopak podporují kulatost na 300 Hz. Komprimujte velmi málo (poměr 1.8:1), abyste nezničili jeho charakter.",
+                hpf: 150,
+                lpf: 12000,
+                eq: [
+                    { freq: 300, gain: 2, q: 1.2 },
+                    { freq: 1200, gain: -4, q: 2.0 }, // Nosal ořez
+                    { freq: 3000, gain: 1, q: 1.0 },
+                    { freq: 6000, gain: -2, q: 1.2 }
+                ],
+                gate: { active: false, th: -80, range: 0, attack: 5, release: 300 },
+                comp: { active: true, th: -12, ratio: 1.8, attack: 15, release: 200 }
+            },
+            {
+                id: "clarinet",
+                name: "Klarinet",
+                category: "Celosymfonický orchestr (Dřevěné dechy)",
+                categorySlug: "woodwinds",
+                type: "sustained",
+                theory: "Klarinet má velmi teplý a dřevěný charakter zvuku v chalumeau registru (dolní rozsah, tělo kolem 150–300 Hz). Naopak v horním registru (clarino) může znít ostře. HPF nastavte na 110 Hz. Nosovost se objevuje na 800 Hz.",
+                practice: "Klarinet je v kapele či orchestru velmi citlivý nástroj. Zkušení zvukaři doporučují mírný boost na 200 Hz pro zachování hřejivosti tónu a opatrnou kompresi s poměrem 2:1 s delším attackem, aby se nepoškodil přirozený náběh tónu.",
+                hpf: 110,
+                lpf: 14000,
+                eq: [
+                    { freq: 220, gain: 2, q: 1.0 },
+                    { freq: 800, gain: -3, q: 1.5 },
+                    { freq: 2500, gain: 1, q: 1.0 },
+                    { freq: 6000, gain: -2, q: 1.2 }
+                ],
+                gate: { active: false, th: -80, range: 0, attack: 5, release: 300 },
+                comp: { active: true, th: -11, ratio: 2.0, attack: 18, release: 180 }
+            },
+            {
+                id: "bassoon",
+                name: "Fagot",
+                category: "Celosymfonický orchestr (Dřevěné dechy)",
+                categorySlug: "woodwinds",
+                type: "sustained",
+                theory: "Fagot je hlubokým zástupcem dřevěných dechů. Poskytuje bohaté basy na 60–120 Hz. HPF nastavujeme na 50 Hz. Vrčivost plátku se projevuje kolem 1.5 kHz.",
+                practice: "Fagot snadno zaniká pod smyčcovou sekcí. Pomáhá mírně pozvednout pásmo středů na 1.8 kHz. Komprese s poměrem 2.5:1 stabilizuje jeho dynamiku v hlubokých pasážích.",
+                hpf: 55,
+                lpf: 9000,
+                eq: [
+                    { freq: 90, gain: 2, q: 1.4 },
+                    { freq: 250, gain: -3, q: 1.2 },
+                    { freq: 1800, gain: 3, q: 1.0 },
+                    { freq: 5000, gain: -1, q: 1.0 }
+                ],
+                gate: { active: false, th: -80, range: 0, attack: 5, release: 300 },
+                comp: { active: true, th: -14, ratio: 2.5, attack: 15, release: 220 }
+            },
+
+            // --- 6. CELOSYMFONICKÝ ORCHESTR (ŽESTĚ) ---
+            {
+                id: "french_horn",
+                name: "Lesní roh (French Horn)",
+                category: "Celosymfonický orchestr (Žestě)",
+                categorySlug: "brass_sym",
+                type: "sustained",
+                theory: "Lesní roh má nejvíce sametový a nejméně agresivní zvuk ze všech žesťů díky směru ozvučníku dozadu. Základní tělo leží mezi 100–250 Hz. HPF nastavte na 70 Hz. Zvuk se otevírá na 1.2 kHz.",
+                practice: "Protože se lesní roh často snímá nepřímo či odrazem, bývá náchylný na hučení v dolních středech. Doporučuje se jemný ořez na 300 Hz. Komprese s nízkým poměrem 2:1 zachová jeho přirozenou vznešenost.",
+                hpf: 75,
+                lpf: 11000,
+                eq: [
+                    { freq: 150, gain: 2, q: 1.2 },
+                    { freq: 300, gain: -3, q: 1.4 },
+                    { freq: 1200, gain: 2, q: 1.0 },
+                    { freq: 4000, gain: 0, q: 1.0 }
+                ],
+                gate: { active: false, th: -80, range: 0, attack: 10, release: 400 },
+                comp: { active: true, th: -12, ratio: 2.0, attack: 20, release: 250 }
+            },
+            {
+                id: "tuba",
+                name: "Tuba",
+                category: "Celosymfonický orchestr (Žestě)",
+                categorySlug: "brass_sym",
+                type: "sustained",
+                theory: "Tuba představuje extrémní basový základ žesťové sekce. HPF nastavte na 30–35 Hz k odfiltrování seismického dunění. Hlavní energie tónu leží na 45–80 Hz. Kovový prskavý tón ventilů se nachází kolem 1.5 kHz.",
+                practice: "Tuba v orchestru plní roli podobnou baskytaře. Rezonuje v sálech na frekvencích kolem 150 Hz, což je pásmo, které doporučujeme tlumit. Kompresor s poměrem 3:1 s delším attackem podrží stabilitu spodního rejstříku orchestru.",
+                hpf: 35,
+                lpf: 6000,
+                eq: [
+                    { freq: 60, gain: 2, q: 1.5 },
+                    { freq: 160, gain: -5, q: 1.5 }, // Room resonance cut
+                    { freq: 1500, gain: 3, q: 1.2 }, // Valve definition
+                    { freq: 4000, gain: -2, q: 1.0 }
+                ],
+                gate: { active: false, th: -80, range: 0, attack: 10, release: 500 },
+                comp: { active: true, th: -15, ratio: 3.0, attack: 20, release: 300 }
+            },
+
+            // --- 7. CELOSYMFONICKÝ ORCHESTR (PERKUSE A OSTATNÍ) ---
+            {
+                id: "timpani",
+                name: "Tympány",
+                category: "Celosymfonický orchestr (Perkuse a ost.)",
+                categorySlug: "percussion",
+                type: "drum",
+                theory: "Tympány mají obrovskou energii na nejnižších kmitočtech. Tělo a rezonance laděného tónu leží na 60–100 Hz. HPF nastavte na 45 Hz. Náraz plsti paličky o blánu se nachází na 2 kHz.",
+                practice: "Live zvukaři se shodují, že příliš dlouhé doznívání tympánů může zahltit celý sál blátem. Použijte jemný expander pro zkrácení dozvuku, nebo mírně potlačte pásmo 220 Hz. Komprimujte s poměrem 3:1 a pomalejším attackem (15 ms) pro průchod počátečního úderu.",
+                hpf: 45,
+                lpf: 10000,
+                eq: [
+                    { freq: 80, gain: 3, q: 1.5 },
+                    { freq: 220, gain: -5, q: 1.2 },
+                    { freq: 2000, gain: 4, q: 1.4 },
+                    { freq: 6000, gain: 0, q: 1.0 }
+                ],
+                gate: { active: true, th: -45, range: 15, attack: 2.0, release: 600 }, // Soft expander to control decay
+                comp: { active: true, th: -14, ratio: 3.0, attack: 15, release: 400 }
+            },
+            {
+                id: "orch_bassdrum",
+                name: "Velký orch. buben / Činely",
+                category: "Celosymfonický orchestr (Perkuse a ost.)",
+                categorySlug: "percussion",
+                type: "drum",
+                theory: "Velký orchestrální buben (Gran Cassa) disponuje nejhlubším basem v orchestru (subbasy 30–50 Hz). Orchestrální činely vyžadují brilanci nad 10 kHz a mírné tlumení agresivity v pásmu 3–4 kHz.",
+                practice: "Gran cassa dokáže živou aparaturu extrémně zatížit. Použijte strmý HPF na 30 Hz. Komprimujte s poměrem 3.5:1 k ochraně subwooferů před poškozením při masivních ranách.",
+                hpf: 30,
+                lpf: 15000,
+                eq: [
+                    { freq: 50, gain: 2, q: 1.5 },
+                    { freq: 250, gain: -4, q: 1.0 },
+                    { freq: 3000, gain: -2, q: 1.2 },
+                    { freq: 11000, gain: 3, q: 0.8 }
+                ],
+                gate: { active: false, th: -80, range: 0, attack: 5, release: 300 },
+                comp: { active: true, th: -12, ratio: 3.5, attack: 10, release: 250 }
+            },
+            {
+                id: "harp",
+                name: "Harfa",
+                category: "Celosymfonický orchestr (Perkuse a ost.)",
+                categorySlug: "percussion",
+                type: "plucked",
+                theory: "Harfa má obrovský frekvenční rozsah s velmi rychlými transienty a dlouhým rezonančním dozvukem. Basový fundament leží na 60–120 Hz. Cinkavost a detail prstů se nachází v pásmu 5–8 kHz. HPF nastavte na 50 Hz.",
+                practice: "Zvučení harfy vyžaduje extrémně citlivý přístup. Pro eliminaci vazby a hučení ozvučné skříně potlačte pásmo 250 Hz. Komprimujte minimálně (poměr 2:1) s pomalým náběhem, aby se nesmazal jemný charakter drnkání.",
+                hpf: 55,
+                lpf: 16000,
+                eq: [
+                    { freq: 100, gain: 1, q: 1.2 },
+                    { freq: 250, gain: -4, q: 1.5 }, // Resonance box cut
+                    { freq: 4000, gain: 2, q: 1.0 },
+                    { freq: 8000, gain: 3, q: 0.8 }
+                ],
+                gate: { active: false, th: -80, range: 0, attack: 10, release: 400 },
+                comp: { active: true, th: -12, ratio: 2.0, attack: 15, release: 200 }
+            }
+        ];
+
+        // Categories List
+        const categories = [
+            { name: "Všechny nástroje", slug: "all" },
+            { name: "Rytmika & Modern", slug: "rytmika" },
+            { name: "Vokály", slug: "vokaly" },
+            { name: "Big Band Dechy", slug: "brass_bb" },
+            { name: "Symf. Smyčce", slug: "strings" },
+            { name: "Symf. Dřeva", slug: "woodwinds" },
+            { name: "Symf. Žestě", slug: "brass_sym" },
+            { name: "Symf. Perkuse", slug: "percussion" }
+        ];
+
+        // State variables
+        let selectedInstrumentIndex = 0;
+        let activeCategory = "all";
+        let filteredInstruments = [...instrumentDatabase];
+        let mockSignalGeneratorInterval = null;
+        
+        // Signal levels for meters
+        let currentInputLevel = -18; // dB
+        let currentGateGR = 0; // dB
+        let currentCompGR = 0; // dB
+
+        // Interactive Drag State for EQ Canvas
+        let isDraggingEQPoint = null; // index of band being dragged (0-3), or 'hpf'
+
+        // DOM elements
+        const instrumentSelect = document.getElementById('instrumentSelect');
+        const prevBtn = document.getElementById('prevBtn');
+        const nextBtn = document.getElementById('nextBtn');
+        const categoryTabsContainer = document.getElementById('categoryTabs');
+        
+        // Text display DOMs
+        const activeInstTitle = document.getElementById('activeInstTitle');
+        const activeInstCategory = document.getElementById('activeInstCategory');
+        const theoryText = document.getElementById('theoryText');
+        const practiceText = document.getElementById('practiceText');
+        
+        // Numerical stats DOMs
+        const statHPF = document.getElementById('statHPF');
+        const statGate = document.getElementById('statGate');
+        const statComp = document.getElementById('statComp');
+
+        // Knobs/Inputs DOMs
+        const eqB1Freq = document.getElementById('eqB1Freq');
+        const eqB1Gain = document.getElementById('eqB1Gain');
+        const eqB1Val = document.getElementById('eqB1Val');
+
+        const eqB2Freq = document.getElementById('eqB2Freq');
+        const eqB2Gain = document.getElementById('eqB2Gain');
+        const eqB2Val = document.getElementById('eqB2Val');
+
+        const eqB3Freq = document.getElementById('eqB3Freq');
+        const eqB3Gain = document.getElementById('eqB3Gain');
+        const eqB3Val = document.getElementById('eqB3Val');
+
+        const eqB4Freq = document.getElementById('eqB4Freq');
+        const eqB4Gain = document.getElementById('eqB4Gain');
+        const eqB4Val = document.getElementById('eqB4Val');
+
+        const gateEnable = document.getElementById('gateEnable');
+        const gateTh = document.getElementById('gateTh');
+        const gateThVal = document.getElementById('gateThVal');
+        const gateRange = document.getElementById('gateRange');
+        const gateRangeVal = document.getElementById('gateRangeVal');
+
+        const compEnable = document.getElementById('compEnable');
+        const compTh = document.getElementById('compTh');
+        const compThVal = document.getElementById('compThVal');
+        const compRatio = document.getElementById('compRatio');
+        const compRatioVal = document.getElementById('compRatioVal');
+
+        const sigGenLevel = document.getElementById('sigGenLevel');
+        const sigGenLevelVal = document.getElementById('sigGenLevelVal');
+        const bypassProcessing = document.getElementById('bypassProcessing');
+
+        // Canvases
+        const eqCanvas = document.getElementById('eqCanvas');
+        const gateCanvas = document.getElementById('gateCanvas');
+        const compCanvas = document.getElementById('compCanvas');
+
+        // Dynamic Meter Bars
+        const gateGRBar = document.getElementById('gateGRBar');
+        const gateGRVal = document.getElementById('gateGRVal');
+        const compGRBar = document.getElementById('compGRBar');
+        const compGRVal = document.getElementById('compGRVal');
+
+        // Initialize application UI
+        function initApp() {
+            renderCategoryTabs();
+            populateSelect();
+            loadInstrument(0);
+            startMockSignalGenerator();
+            
+            // Set up event listeners
+            instrumentSelect.addEventListener('change', (e) => {
+                const index = instrumentDatabase.findIndex(inst => inst.id === e.target.value);
+                if (index !== -1) {
+                    loadInstrument(index);
+                }
+            });
+
+            prevBtn.addEventListener('click', navigatePrevious);
+            nextBtn.addEventListener('click', navigateNext);
+
+            // Listeners for EQ controls
+            [eqB1Freq, eqB1Gain, eqB2Freq, eqB2Gain, eqB3Freq, eqB3Gain, eqB4Freq, eqB4Gain].forEach(ctrl => {
+                ctrl.addEventListener('input', updateEQFromControls);
+            });
+
+            // Listeners for Gate controls
+            gateEnable.addEventListener('change', updateGateFromControls);
+            gateTh.addEventListener('input', updateGateFromControls);
+            gateRange.addEventListener('input', updateGateFromControls);
+
+            // Listeners for Comp controls
+            compEnable.addEventListener('change', updateCompFromControls);
+            compTh.addEventListener('input', updateCompFromControls);
+            compRatio.addEventListener('input', updateCompFromControls);
+
+            // Signal generator level slider listener
+            sigGenLevel.addEventListener('input', (e) => {
+                sigGenLevelVal.innerText = `${e.target.value} dB`;
+            });
+
+            // Resize listeners to keep canvas graphics crisp
+            window.addEventListener('resize', drawAllCanvases);
+
+            // Set up interactive dragging on EQ canvas (includes touch event support for tablets/mobiles!)
+            setupEQDragging();
+        }
+
+        // Category Tab Rendering
+        function renderCategoryTabs() {
+            categoryTabsContainer.innerHTML = '';
+            categories.forEach(cat => {
+                const btn = document.createElement('button');
+                btn.className = `px-3.5 py-1.5 rounded-full text-xs font-bold transition uppercase tracking-wider shrink-0 ${
+                    activeCategory === cat.slug 
+                    ? 'bg-cyan-500 text-slate-950 shadow-md shadow-cyan-500/10' 
+                    : 'bg-slate-900 text-slate-400 hover:bg-slate-800 hover:text-white'
+                }`;
+                btn.innerText = cat.name;
+                btn.addEventListener('click', () => {
+                    activeCategory = cat.slug;
+                    renderCategoryTabs();
+                    populateSelect();
+                    // Load first from filtered list
+                    if (filteredInstruments.length > 0) {
+                        const targetId = filteredInstruments[0].id;
+                        const mainIdx = instrumentDatabase.findIndex(i => i.id === targetId);
+                        loadInstrument(mainIdx);
+                    }
+                });
+                categoryTabsContainer.appendChild(btn);
+            });
+        }
+
+        // Populates the dropdown select options based on selected category filter
+        function populateSelect() {
+            instrumentSelect.innerHTML = '';
+            if (activeCategory === 'all') {
+                filteredInstruments = [...instrumentDatabase];
+            } else {
+                filteredInstruments = instrumentDatabase.filter(inst => inst.categorySlug === activeCategory);
+            }
+
+            filteredInstruments.forEach(inst => {
+                const opt = document.createElement('option');
+                opt.value = inst.id;
+                opt.innerText = inst.name;
+                instrumentSelect.appendChild(opt);
+            });
+        }
+
+        // Navigation controls
+        function navigatePrevious() {
+            if (filteredInstruments.length === 0) return;
+            const currentSelectedId = instrumentDatabase[selectedInstrumentIndex].id;
+            let filterIdx = filteredInstruments.findIndex(i => i.id === currentSelectedId);
+            filterIdx = (filterIdx - 1 + filteredInstruments.length) % filteredInstruments.length;
+            
+            const targetId = filteredInstruments[filterIdx].id;
+            const mainIdx = instrumentDatabase.findIndex(i => i.id === targetId);
+            loadInstrument(mainIdx);
+        }
+
+        function navigateNext() {
+            if (filteredInstruments.length === 0) return;
+            const currentSelectedId = instrumentDatabase[selectedInstrumentIndex].id;
+            let filterIdx = filteredInstruments.findIndex(i => i.id === currentSelectedId);
+            filterIdx = (filterIdx + 1) % filteredInstruments.length;
+            
+            const targetId = filteredInstruments[filterIdx].id;
+            const mainIdx = instrumentDatabase.findIndex(i => i.id === targetId);
+            loadInstrument(mainIdx);
+        }
+
+        // Core Loader of instrument profile
+        function loadInstrument(index) {
+            selectedInstrumentIndex = index;
+            const inst = instrumentDatabase[index];
+            
+            // Set sync dropdown selection
+            instrumentSelect.value = inst.id;
+
+            // Update Metadata Texts
+            activeInstTitle.innerText = inst.name;
+            activeInstCategory.innerText = inst.category;
+            theoryText.innerText = inst.theory;
+            practiceText.innerText = inst.practice;
+
+            // Set Numerical summary
+            statHPF.innerText = `${inst.hpf} Hz`;
+            statGate.innerText = inst.gate.active ? `${inst.gate.th} dB` : 'Bypass';
+            statComp.innerText = inst.comp.active ? `${inst.comp.ratio.toFixed(1)}:1 / ${inst.comp.th}dB` : 'Bypass';
+
+            // Sync Sliders/Knobs state
+            eqB1Freq.value = inst.eq[0].freq;
+            eqB1Gain.value = inst.eq[0].gain;
+            eqB1Val.innerText = `${inst.eq[0].freq}Hz (${inst.eq[0].gain > 0 ? '+' : ''}${inst.eq[0].gain}dB)`;
+
+            eqB2Freq.value = inst.eq[1].freq;
+            eqB2Gain.value = inst.eq[1].gain;
+            eqB2Val.innerText = `${inst.eq[1].freq}Hz (${inst.eq[1].gain > 0 ? '+' : ''}${inst.eq[1].gain}dB)`;
+
+            eqB3Freq.value = inst.eq[2].freq;
+            eqB3Gain.value = inst.eq[2].gain;
+            eqB3Val.innerText = inst.eq[2].freq >= 1000 ? `${(inst.eq[2].freq / 1000).toFixed(1)}kHz (${inst.eq[2].gain > 0 ? '+' : ''}${inst.eq[2].gain}dB)` : `${inst.eq[2].freq}Hz (${inst.eq[2].gain > 0 ? '+' : ''}${inst.eq[2].gain}dB)`;
+
+            eqB4Freq.value = inst.eq[3].freq;
+            eqB4Gain.value = inst.eq[3].gain;
+            eqB4Val.innerText = `${(inst.eq[3].freq / 1000).toFixed(1)}kHz (${inst.eq[3].gain > 0 ? '+' : ''}${inst.eq[3].gain}dB)`;
+
+            // Sync Gate state
+            gateEnable.checked = inst.gate.active;
+            gateTh.value = inst.gate.th;
+            gateThVal.innerText = `${inst.gate.th} dB`;
+            gateRange.value = inst.gate.range;
+            gateRangeVal.innerText = `${inst.gate.range} dB`;
+
+            // Sync Compressor state
+            compEnable.checked = inst.comp.active;
+            compTh.value = inst.comp.th;
+            compThVal.innerText = `${inst.comp.th} dB`;
+            compRatio.value = inst.comp.ratio;
+            compRatioVal.innerText = `${inst.comp.ratio.toFixed(1)}:1`;
+
+            // Redraw everything
+            drawAllCanvases();
+        }
+
+        // Logic for tracking interactive changes of EQ controls
+        function updateEQFromControls() {
+            const inst = instrumentDatabase[selectedInstrumentIndex];
+            inst.eq[0].freq = parseInt(eqB1Freq.value);
+            inst.eq[0].gain = parseFloat(eqB1Gain.value);
+            eqB1Val.innerText = `${inst.eq[0].freq}Hz (${inst.eq[0].gain > 0 ? '+' : ''}${inst.eq[0].gain}dB)`;
+
+            inst.eq[1].freq = parseInt(eqB2Freq.value);
+            inst.eq[1].gain = parseFloat(eqB2Gain.value);
+            eqB2Val.innerText = `${inst.eq[1].freq}Hz (${inst.eq[1].gain > 0 ? '+' : ''}${inst.eq[1].gain}dB)`;
+
+            inst.eq[2].freq = parseInt(eqB3Freq.value);
+            inst.eq[2].gain = parseFloat(eqB3Gain.value);
+            eqB3Val.innerText = inst.eq[2].freq >= 1000 ? `${(inst.eq[2].freq / 1000).toFixed(1)}kHz (${inst.eq[2].gain > 0 ? '+' : ''}${inst.eq[2].gain}dB)` : `${inst.eq[2].freq}Hz (${inst.eq[2].gain > 0 ? '+' : ''}${inst.eq[2].gain}dB)`;
+
+            inst.eq[3].freq = parseInt(eqB4Freq.value);
+            inst.eq[3].gain = parseFloat(eqB4Gain.value);
+            eqB4Val.innerText = `${(inst.eq[3].freq / 1000).toFixed(1)}kHz (${inst.eq[3].gain > 0 ? '+' : ''}${inst.eq[3].gain}dB)`;
+
+            drawEQCanvas();
+        }
+
+        // Logic for tracking dynamic changes of Gate controls
+        function updateGateFromControls() {
+            const inst = instrumentDatabase[selectedInstrumentIndex];
+            inst.gate.active = gateEnable.checked;
+            inst.gate.th = parseInt(gateTh.value);
+            inst.gate.range = parseInt(gateRange.value);
+
+            gateThVal.innerText = `${inst.gate.th} dB`;
+            gateRangeVal.innerText = `${inst.gate.range} dB`;
+            statGate.innerText = inst.gate.active ? `${inst.gate.th} dB` : 'Bypass';
+
+            drawGateCanvas();
+        }
+
+        // Logic for tracking dynamic changes of Compressor controls
+        function updateCompFromControls() {
+            const inst = instrumentDatabase[selectedInstrumentIndex];
+            inst.comp.active = compEnable.checked;
+            inst.comp.th = parseInt(compTh.value);
+            inst.comp.ratio = parseFloat(compRatio.value);
+
+            compThVal.innerText = `${inst.comp.th} dB`;
+            compRatioVal.innerText = `${inst.comp.ratio.toFixed(1)}:1`;
+            statComp.innerText = inst.comp.active ? `${inst.comp.ratio.toFixed(1)}:1 / ${inst.comp.th}dB` : 'Bypass';
+
+            drawCompCanvas();
+        }
+
+        // DRAW ALL GRAPH CANVASES
+        function drawAllCanvases() {
+            drawEQCanvas();
+            drawGateCanvas();
+            drawCompCanvas();
+        }
+
+        // Logarithmic frequency converters for EQ Graph
+        const minFreq = 20;
+        const maxFreq = 20000;
+        
+        function freqToX(freq, width) {
+            const clampedFreq = Math.max(minFreq, Math.min(maxFreq, freq));
+            return width * (Math.log10(clampedFreq / minFreq) / Math.log10(maxFreq / minFreq));
+        }
+
+        function xToFreq(x, width) {
+            const clampedX = Math.max(0, Math.min(width, x));
+            return minFreq * Math.pow(10, (clampedX / width) * Math.log10(maxFreq / minFreq));
+        }
+
+        // dB converters for EQ Graph (vertical axis ±15 dB)
+        const maxGain = 15;
+        function gainToY(gain, height) {
+            return height / 2 - (gain / maxGain) * (height / 2);
+        }
+
+        function yToGain(y, height) {
+            return -((y - height / 2) / (height / 2)) * maxGain;
+        }
+
+        // EQUALIZER CANVAS DRAWING ENGINE
+        function drawEQCanvas() {
+            if (!eqCanvas) return;
+            const ctx = eqCanvas.getContext('2d');
+            const rect = eqCanvas.getBoundingClientRect();
+            eqCanvas.width = rect.width;
+            eqCanvas.height = rect.height;
+
+            const w = eqCanvas.width;
+            const h = eqCanvas.height;
+
+            // SAFE GUARD: Pokud má plátno nulovou velikost (nebylo ještě vykresleno), ukončíme metodu, abychom předešli chybám
+            if (w <= 0 || h <= 0) return;
+
+            // 1. Draw Background Grid
+            ctx.fillStyle = '#05070a';
+            ctx.fillRect(0, 0, w, h);
+
+            // Frequency lines (Hz)
+            const gridFrequencies = [20, 50, 100, 200, 500, 1000, 2000, 5000, 10000, 20000];
+            ctx.strokeStyle = '#111622';
+            ctx.lineWidth = 1;
+            ctx.fillStyle = '#475569';
+            ctx.font = '9px monospace';
+            
+            gridFrequencies.forEach(freq => {
+                const x = freqToX(freq, w);
+                ctx.beginPath();
+                ctx.moveTo(x, 0);
+                ctx.lineTo(x, h);
+                ctx.stroke();
+
+                // Draw label at the bottom of the grid
+                let label = freq >= 1000 ? `${freq/1000}kHz` : `${freq}Hz`;
+                ctx.fillText(label, x + 3, h - 8);
+            });
+
+            // dB scale lines (horizontal)
+            const dBGridLines = [-12, -9, -6, -3, 0, 3, 6, 9, 12];
+            dBGridLines.forEach(db => {
+                const y = gainToY(db, h);
+                ctx.beginPath();
+                ctx.moveTo(0, y);
+                ctx.lineTo(w, y);
+                ctx.strokeStyle = db === 0 ? '#334155' : '#111622';
+                ctx.lineWidth = db === 0 ? 1.5 : 1;
+                ctx.stroke();
+
+                ctx.fillText(`${db > 0 ? '+' : ''}${db}`, 5, y - 3);
+            });
+
+            // 2. Compute resultant EQ curve
+            const inst = instrumentDatabase[selectedInstrumentIndex];
+            const curvePoints = [];
+
+            // Standard Bell Filters simulator (Gaussian approach for smooth digital-like bell shape)
+            function getBellCurveMultiplier(f, bFreq, bGain, bQ) {
+                // Logarithmic distance to keep bell symmetrical on log scale
+                const dist = Math.log10(f / bFreq);
+                const octWidth = 1.0 / bQ; // Q relation to bandwidth octave wide
+                const spread = octWidth * 0.4;
+                return bGain * Math.exp(-Math.pow(dist / spread, 2));
+            }
+
+            // High-Pass Filter slope simulator (12dB/octave Butterworth)
+            function getHPFMultiplier(f, hFreq) {
+                if (f >= hFreq) {
+                    const ratio = hFreq / f;
+                    return -12.0 * Math.pow(ratio, 2); // Approximation of roll-off
+                } else {
+                    const ratio = hFreq / f;
+                    return -12.0 * ratio - 6.0; // steeper drop-off below cut-off
+                }
+            }
+
+            // Low-Pass Filter slope simulator
+            function getLPFMultiplier(f, lFreq) {
+                if (f <= lFreq) {
+                    return 0;
+                } else {
+                    const ratio = f / lFreq;
+                    return -18.0 * ratio;
+                }
+            }
+
+            // Iterate over every pixel x to calculate final dB value
+            for (let x = 0; x < w; x++) {
+                const f = xToFreq(x, w);
+                let totalDb = 0;
+
+                // Add HPF
+                totalDb += getHPFMultiplier(f, inst.hpf);
+                
+                // Add LPF
+                totalDb += getLPFMultiplier(f, inst.lpf);
+
+                // Add 4 Bell bands
+                inst.eq.forEach(band => {
+                    totalDb += getBellCurveMultiplier(f, band.freq, band.gain, band.q || 1.2);
+                });
+
+                curvePoints.push({ x: x, y: gainToY(totalDb, h) });
+            }
+
+            // 3. Draw Resultant EQ Curve Line (Glowing Neon Green)
+            if (curvePoints.length > 0) {
+                ctx.shadowColor = '#10b981';
+                ctx.shadowBlur = 4;
+                ctx.strokeStyle = '#10b981';
+                ctx.lineWidth = 3;
+                ctx.beginPath();
+                ctx.moveTo(curvePoints[0].x, curvePoints[0].y);
+                for (let i = 1; i < curvePoints.length; i++) {
+                    // Clamp within vertical canvas boundary for aesthetics
+                    let cy = Math.max(0, Math.min(h, curvePoints[i].y));
+                    ctx.lineTo(curvePoints[i].x, cy);
+                }
+                ctx.stroke();
+                ctx.shadowBlur = 0; // reset shadow
+            }
+
+            // 4. Draw interactive EQ Nodes
+            // Draw HPF marker
+            const hpfX = freqToX(inst.hpf, w);
+            ctx.beginPath();
+            ctx.arc(hpfX, h - 30, 6, 0, 2 * Math.PI);
+            ctx.fillStyle = '#ef4444';
+            ctx.fill();
+            ctx.strokeStyle = '#ffffff';
+            ctx.lineWidth = 1.5;
+            ctx.stroke();
+            ctx.fillStyle = '#ffffff';
+            ctx.font = 'bold 8px monospace';
+            ctx.fillText("HPF", hpfX - 8, h - 42);
+
+            // Draw Band nodes
+            const nodeColors = ['#10b981', '#f59e0b', '#06b6d4', '#ec4899'];
+            inst.eq.forEach((band, i) => {
+                const nx = freqToX(band.freq, w);
+                const ny = gainToY(band.gain, h);
+
+                ctx.beginPath();
+                ctx.arc(nx, ny, 7, 0, 2 * Math.PI);
+                ctx.fillStyle = nodeColors[i];
+                ctx.fill();
+                ctx.strokeStyle = '#ffffff';
+                ctx.lineWidth = 1.5;
+                ctx.stroke();
+
+                ctx.fillStyle = '#ffffff';
+                ctx.font = 'bold 9px sans-serif';
+                ctx.fillText(`B${i+1}`, nx - 6, ny - 11);
+            });
+        }
+
+        // Drag and drop interaction with parametric nodes inside EQ Canvas
+        function setupEQDragging() {
+            function getMousePos(e) {
+                const rect = eqCanvas.getBoundingClientRect();
+                // Vyrovnání pro dotyk vs myš
+                const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+                const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+                return {
+                    x: clientX - rect.left,
+                    y: clientY - rect.top
+                };
+            }
+
+            function startDrag(e) {
+                const mouse = getMousePos(e);
+                const w = eqCanvas.width;
+                const h = eqCanvas.height;
+                if (w <= 0 || h <= 0) return;
+                
+                const inst = instrumentDatabase[selectedInstrumentIndex];
+
+                // Check collision with HPF
+                const hpfX = freqToX(inst.hpf, w);
+                const hpfY = h - 30;
+                if (Math.hypot(mouse.x - hpfX, mouse.y - hpfY) < 18) {
+                    isDraggingEQPoint = 'hpf';
+                    e.preventDefault();
+                    return;
+                }
+
+                // Check collision with Bands
+                for (let i = 0; i < inst.eq.length; i++) {
+                    const bx = freqToX(inst.eq[i].freq, w);
+                    const by = gainToY(inst.eq[i].gain, h);
+                    if (Math.hypot(mouse.x - bx, mouse.y - by) < 18) {
+                        isDraggingEQPoint = i;
+                        e.preventDefault();
+                        return;
+                    }
+                }
+            }
+
+            function dragMove(e) {
+                if (isDraggingEQPoint === null) return;
+                const mouse = getMousePos(e);
+                const w = eqCanvas.width;
+                const h = eqCanvas.height;
+                if (w <= 0 || h <= 0) return;
+
+                const inst = instrumentDatabase[selectedInstrumentIndex];
+
+                // Clamp X mouse coord within boundary
+                const cx = Math.max(5, Math.min(w - 5, mouse.x));
+                const cy = Math.max(5, Math.min(h - 5, mouse.y));
+
+                if (isDraggingEQPoint === 'hpf') {
+                    let freqVal = Math.round(xToFreq(cx, w));
+                    // Clamp HPF frequency
+                    freqVal = Math.max(20, Math.min(1000, freqVal));
+                    inst.hpf = freqVal;
+                    statHPF.innerText = `${freqVal} Hz`;
+                } else {
+                    const idx = isDraggingEQPoint;
+                    let freqVal = Math.round(xToFreq(cx, w));
+                    let gainVal = parseFloat(yToGain(cy, h).toFixed(1));
+
+                    // Clamp frequency based on specific bands to prevent overlaps
+                    if (idx === 0) freqVal = Math.max(20, Math.min(500, freqVal));
+                    if (idx === 1) freqVal = Math.max(150, Math.min(2500, freqVal));
+                    if (idx === 2) freqVal = Math.max(800, Math.min(9000, freqVal));
+                    if (idx === 3) freqVal = Math.max(3000, Math.min(19500, freqVal));
+
+                    gainVal = Math.max(-15, Math.min(15, gainVal));
+
+                    inst.eq[idx].freq = freqVal;
+                    inst.eq[idx].gain = gainVal;
+
+                    // Sync UI inputs directly
+                    if (idx === 0) {
+                        eqB1Freq.value = freqVal; eqB1Gain.value = gainVal;
+                        eqB1Val.innerText = `${freqVal}Hz (${gainVal > 0 ? '+' : ''}${gainVal}dB)`;
+                    }
+                    if (idx === 1) {
+                        eqB2Freq.value = freqVal; eqB2Gain.value = gainVal;
+                        eqB2Val.innerText = `${freqVal}Hz (${gainVal > 0 ? '+' : ''}${gainVal}dB)`;
+                    }
+                    if (idx === 2) {
+                        eqB3Freq.value = freqVal; eqB3Gain.value = gainVal;
+                        eqB3Val.innerText = freqVal >= 1000 ? `${(freqVal / 1000).toFixed(1)}kHz (${gainVal > 0 ? '+' : ''}${gainVal}dB)` : `${freqVal}Hz (${gainVal > 0 ? '+' : ''}${gainVal}dB)`;
+                    }
+                    if (idx === 3) {
+                        eqB4Freq.value = freqVal; eqB4Gain.value = gainVal;
+                        eqB4Val.innerText = `${(freqVal / 1000).toFixed(1)}kHz (${gainVal > 0 ? '+' : ''}${gainVal}dB)`;
+                    }
+                }
+
+                drawEQCanvas();
+                e.preventDefault();
+            }
+
+            function stopDrag() {
+                isDraggingEQPoint = null;
+            }
+
+            // Mouse listeners
+            eqCanvas.addEventListener('mousedown', startDrag);
+            window.addEventListener('mousemove', dragMove);
+            window.addEventListener('mouseup', stopDrag);
+
+            // Touch listeners
+            eqCanvas.addEventListener('touchstart', startDrag, { passive: false });
+            window.addEventListener('touchmove', dragMove, { passive: false });
+            window.addEventListener('touchend', stopDrag);
+        }
+
+        // NOISE GATE GRAPH ENGINE
+        function drawGateCanvas() {
+            if (!gateCanvas) return;
+            const ctx = gateCanvas.getContext('2d');
+            const rect = gateCanvas.getBoundingClientRect();
+            gateCanvas.width = rect.width;
+            gateCanvas.height = rect.height;
+
+            const w = gateCanvas.width;
+            const h = gateCanvas.height;
+
+            if (w <= 0 || h <= 0) return;
+
+            // Background
+            ctx.fillStyle = '#05070a';
+            ctx.fillRect(0, 0, w, h);
+
+            // DB helper scale lines (-80 to 0)
+            ctx.strokeStyle = '#111622';
+            ctx.lineWidth = 1;
+            ctx.fillStyle = '#475569';
+            ctx.font = '8px monospace';
+
+            const dbLines = [-80, -60, -40, -20, 0];
+            dbLines.forEach(db => {
+                // Map to coordinate x/y
+                const ratio = (db + 80) / 80;
+                const x = ratio * w;
+                const y = h - (ratio * h);
+
+                // Vertical lines
+                ctx.beginPath();
+                ctx.moveTo(x, 0);
+                ctx.lineTo(x, h);
+                ctx.stroke();
+
+                // Horizontal lines
+                ctx.beginPath();
+                ctx.moveTo(0, y);
+                ctx.lineTo(w, y);
+                ctx.stroke();
+
+                ctx.fillText(`${db}`, x + 2, h - 3);
+            });
+
+            // 1:1 Reference Line (Dashed)
+            ctx.strokeStyle = '#1e293b';
+            ctx.setLineDash([4, 4]);
+            ctx.beginPath();
+            ctx.moveTo(0, h);
+            ctx.lineTo(w, 0);
+            ctx.stroke();
+            ctx.setLineDash([]);
+
+            // Draw current active Transfer Curve
+            const isGateOn = gateEnable.checked;
+            const threshold = parseInt(gateTh.value);
+            const range = parseInt(gateRange.value);
+
+            ctx.beginPath();
+            ctx.lineWidth = 2.5;
+            ctx.strokeStyle = isGateOn ? '#f59e0b' : '#475569';
+
+            for (let x = 0; x <= w; x++) {
+                const inDb = -80 + (x / w) * 80;
+                let outDb = inDb;
+
+                if (isGateOn) {
+                    if (inDb < threshold) {
+                        outDb = inDb - range;
+                        if (outDb < -90) outDb = -90; // clamp floor
+                    }
+                }
+
+                const y = h - ((outDb + 80) / 80) * h;
+                if (x === 0) {
+                    ctx.moveTo(x, y);
+                } else {
+                    ctx.lineTo(x, y);
+                }
+            }
+            ctx.stroke();
+
+            // Threshold point visualizer
+            if (isGateOn) {
+                const thX = ((threshold + 80) / 80) * w;
+                const thY = h - ((threshold + 80) / 80) * h;
+                ctx.beginPath();
+                ctx.arc(thX, thY, 5, 0, 2 * Math.PI);
+                ctx.fillStyle = '#f59e0b';
+                ctx.fill();
+            }
+
+            // Realtime running dot tracker
+            if (isGateOn && !bypassProcessing.checked) {
+                const dotX = ((currentInputLevel + 80) / 80) * w;
+                let outLevel = currentInputLevel;
+                if (currentInputLevel < threshold) {
+                    outLevel = currentInputLevel - range;
+                }
+                const dotY = h - ((outLevel + 80) / 80) * h;
+                
+                ctx.beginPath();
+                ctx.arc(dotX, Math.max(0, Math.min(h, dotY)), 4, 0, 2 * Math.PI);
+                ctx.fillStyle = '#ffffff';
+                ctx.shadowColor = '#ffffff';
+                ctx.shadowBlur = 8;
+                ctx.fill();
+                ctx.shadowBlur = 0;
+            }
+        }
+
+        // COMPRESSOR GRAPH ENGINE
+        function drawCompCanvas() {
+            if (!compCanvas) return;
+            const ctx = compCanvas.getContext('2d');
+            const rect = compCanvas.getBoundingClientRect();
+            compCanvas.width = rect.width;
+            compCanvas.height = rect.height;
+
+            const w = compCanvas.width;
+            const h = compCanvas.height;
+
+            if (w <= 0 || h <= 0) return;
+
+            // Background
+            ctx.fillStyle = '#05070a';
+            ctx.fillRect(0, 0, w, h);
+
+            // DB scale lines (-60 to 0)
+            ctx.strokeStyle = '#111622';
+            ctx.lineWidth = 1;
+            ctx.fillStyle = '#475569';
+            ctx.font = '8px monospace';
+
+            const dbLines = [-60, -40, -20, 0];
+            dbLines.forEach(db => {
+                const ratio = (db + 60) / 60;
+                const x = ratio * w;
+                const y = h - (ratio * h);
+
+                // Verticals
+                ctx.beginPath();
+                ctx.moveTo(x, 0);
+                ctx.lineTo(x, h);
+                ctx.stroke();
+
+                // Horizontals
+                ctx.beginPath();
+                ctx.moveTo(0, y);
+                ctx.lineTo(w, y);
+                ctx.stroke();
+
+                ctx.fillText(`${db}`, x + 2, h - 3);
+            });
+
+            // 1:1 Reference line
+            ctx.strokeStyle = '#1e293b';
+            ctx.setLineDash([4, 4]);
+            ctx.beginPath();
+            ctx.moveTo(0, h);
+            ctx.lineTo(w, 0);
+            ctx.stroke();
+            ctx.setLineDash([]);
+
+            const isCompOn = compEnable.checked;
+            const threshold = parseInt(compTh.value);
+            const ratio = parseFloat(compRatio.value);
+
+            // Curve drawing
+            ctx.beginPath();
+            ctx.lineWidth = 2.5;
+            ctx.strokeStyle = isCompOn ? '#06b6d4' : '#475569';
+
+            for (let x = 0; x <= w; x++) {
+                const inDb = -60 + (x / w) * 60;
+                let outDb = inDb;
+
+                if (isCompOn && inDb > threshold) {
+                    outDb = threshold + (inDb - threshold) / ratio;
+                }
+
+                const y = h - ((outDb + 60) / 60) * h;
+                if (x === 0) {
+                    ctx.moveTo(x, y);
+                } else {
+                    ctx.lineTo(x, y);
+                }
+            }
+            ctx.stroke();
+
+            // Threshold node
+            if (isCompOn) {
+                const thX = ((threshold + 60) / 60) * w;
+                const thY = h - ((threshold + 60) / 60) * h;
+                ctx.beginPath();
+                ctx.arc(thX, thY, 5, 0, 2 * Math.PI);
+                ctx.fillStyle = '#06b6d4';
+                ctx.fill();
+            }
+
+            // Realtime tracking dot
+            if (isCompOn && !bypassProcessing.checked) {
+                const dotX = ((currentInputLevel + 60) / 60) * w;
+                let outLevel = currentInputLevel;
+                if (currentInputLevel > threshold) {
+                    outLevel = threshold + (currentInputLevel - threshold) / ratio;
+                }
+                const dotY = h - ((outLevel + 60) / 60) * h;
+
+                ctx.beginPath();
+                ctx.arc(dotX, Math.max(0, Math.min(h, dotY)), 4, 0, 2 * Math.PI);
+                ctx.fillStyle = '#ffffff';
+                ctx.shadowColor = '#ffffff';
+                ctx.shadowBlur = 8;
+                ctx.fill();
+                ctx.shadowBlur = 0;
+            }
+        }
+
+        // REALTIME SIGNAL GENERATOR SIMULATOR
+        // This loop simulates actual sound input, oscillating back and forth
+        // to show GR meters and curve dots moving dynamically in real time
+        function startMockSignalGenerator() {
+            let time = 0;
+            mockSignalGeneratorInterval = setInterval(() => {
+                time += 0.05;
+                
+                // Get setting from generator level slider
+                const targetBaseLevel = parseInt(sigGenLevel.value);
+                const inst = instrumentDatabase[selectedInstrumentIndex];
+                
+                // Intelligent simulated signal oscillation depending on instrument category (to show active processing visually)
+                let amplitudeOscillation = 0;
+                
+                if (inst.type === "drum") {
+                    // Drum envelope: sharp repetitive transient spikes with rapid exponential decay
+                    const pulse = (time * 1.5) % Math.PI; 
+                    if (pulse < 0.2) {
+                        amplitudeOscillation = (1 - (pulse / 0.2)) * 35; // aggressive peak spike
+                    } else {
+                        amplitudeOscillation = -15 + Math.sin(time * 10) * 2; // quiet decay floor
+                    }
+                } else if (inst.type === "plucked") {
+                    // Strummed instrument envelope: slightly softer attack, medium decay
+                    const pulse = (time * 1.0) % Math.PI;
+                    if (pulse < 0.4) {
+                        amplitudeOscillation = (1 - (pulse / 0.4)) * 25;
+                    } else {
+                        amplitudeOscillation = -10 + Math.sin(time * 5) * 1.5;
+                    }
+                } else if (inst.type === "sustained") {
+                    // Vocal/Brass continuous wave: slow smooth oscillations
+                    amplitudeOscillation = Math.sin(time * 2) * 15 + Math.cos(time * 0.7) * 4;
+                } else {
+                    // Continuous dense sound (guitars/keys)
+                    amplitudeOscillation = Math.sin(time * 4) * 8 + Math.cos(time * 1.5) * 3;
+                }
+                
+                let rawInputLevel = targetBaseLevel + amplitudeOscillation;
+                
+                // Keep input within absolute physical thresholds
+                if (rawInputLevel > 0) rawInputLevel = 0;
+                if (rawInputLevel < -90) rawInputLevel = -90;
+
+                currentInputLevel = rawInputLevel;
+
+                // Process gate dynamic gain reduction
+                if (gateEnable.checked && !bypassProcessing.checked) {
+                    if (currentInputLevel < inst.gate.th) {
+                        currentGateGR = inst.gate.range;
+                    } else {
+                        // Smooth recovery (release)
+                        currentGateGR = Math.max(0, currentGateGR - 2.8);
+                    }
+                } else {
+                    currentGateGR = 0;
+                }
+
+                // Process compressor dynamic gain reduction
+                if (compEnable.checked && !bypassProcessing.checked) {
+                    if (currentInputLevel > inst.comp.th) {
+                        const excess = currentInputLevel - inst.comp.th;
+                        const targetOut = inst.comp.th + excess / inst.comp.ratio;
+                        currentCompGR = Math.abs(currentInputLevel - targetOut);
+                    } else {
+                        // Soft release behavior
+                        currentCompGR = Math.max(0, currentCompGR - 1.2);
+                    }
+                } else {
+                    currentCompGR = 0;
+                }
+
+                // Redraw tracking dots on canvas
+                drawGateCanvas();
+                drawCompCanvas();
+
+                // Update UI Meter elements
+                // Gate meter mapping (max range assumed 45dB)
+                const gatePercent = Math.min(100, (currentGateGR / 45) * 100);
+                gateGRBar.style.height = `${gatePercent}%`;
+                gateGRVal.innerText = `-${Math.round(currentGateGR)} dB`;
+
+                // Comp meter mapping (max range assumed 15dB)
+                const compPercent = Math.min(100, (currentCompGR / 15) * 100);
+                compGRBar.style.height = `${compPercent}%`;
+                compGRVal.innerText = `-${Math.round(currentCompGR)} dB`;
+
+            }, 50);
+        }
+
+        // Initialize application on window load
+        window.onload = function() {
+            initApp();
+        }
+    </script>
+</body>
+</html>
